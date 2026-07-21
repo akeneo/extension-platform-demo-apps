@@ -9,6 +9,7 @@
     "worker": "node dist/workers/syncWorker.js",
     "worker:dev": "ts-node --transpile-only src/workers/syncWorker.ts",
     "daily-sync": "node dist/commands/dailySync.js",
+    "daily-sync-simulate": "node dist/commands/dailySyncSimulate.js",
     "sync-now": "node dist/commands/syncNow.js",
     "cleanup-logs": "node dist/commands/cleanupLogs.js",
     "migrate": "prisma migrate deploy"
