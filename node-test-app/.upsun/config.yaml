@@ -78,7 +78,7 @@ applications:
                         node dist/commands/cleanupLogs.js
 
         workers:
-            sync:
+            messenger:
                 commands:
                     start: |
                         export DATABASE_URL="postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_PATH}"
