@@ -1,0 +1,32 @@
+{
+  "name": "extension-platform-node-test-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "ts-node --transpile-only src/app.ts",
+    "worker": "node dist/workers/syncWorker.js",
+    "worker:dev": "ts-node --transpile-only src/workers/syncWorker.ts",
+    "daily-sync": "node dist/commands/dailySync.js",
+    "sync-now": "node dist/commands/syncNow.js",
+    "cleanup-logs": "node dist/commands/cleanupLogs.js",
+    "migrate": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "amqplib": "^2.0.1",
+    "express": "^4.21.2",
+    "ioredis": "^5.4.1",
+    "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.8",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.2",
+    "@types/nunjucks": "^3.2.6",
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}

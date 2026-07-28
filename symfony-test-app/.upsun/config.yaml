@@ -1,0 +1,102 @@
+routes:
+    "https://{all}/": { type: upstream, upstream: "app:http" }
+    "http://{all}/": { type: redirect, to: "https://{all}/" }
+
+services:
+    database:
+        type: postgresql:15
+
+    cache:
+        type: redis:7.2
+        configuration:
+            maxmemory_policy: volatile-lru
+
+    queue:
+        type: rabbitmq:3.12
+
+applications:
+    app:
+        source:
+            root: "/"
+
+        type: php:8.3
+
+        runtime:
+            extensions:
+                - apcu
+                - blackfire
+                - ctype
+                - iconv
+                - mbstring
+                - sodium
+                - xsl
+                - pdo_pgsql
+                - redis
+                - amqp
+
+        relationships:
+            database: "database:postgresql"
+            cache: "cache:redis"
+            queue: "queue:rabbitmq"
+
+        variables:
+            php:
+                opcache.preload: config/preload.php
+            env:
+                REDIS_URL: "redis://cache.internal:6379"
+
+        build:
+            flavor: none
+
+        web:
+            locations:
+                "/":
+                    root: "public"
+                    expires: 1h
+                    passthru: "/index.php"
+
+        mounts:
+            "/var/cache": { source: instance, source_path: var/cache }
+            "/var/share": { source: storage, source_path: var/share }
+            "/var/product-images": { source: storage, source_path: product-images }
+
+        hooks:
+            build: |
+                set -x -e
+
+                curl -fs https://get.symfony.com/cloud/configurator | bash
+
+                NODE_VERSION=22 symfony-build
+
+            deploy: |
+                set -x -e
+
+                symfony-deploy
+                php bin/console doctrine:migrations:migrate --no-interaction
+                php bin/console messenger:setup-transports --no-interaction
+
+        crons:
+            daily-sync:
+                spec: '0 2 * * *'
+                commands:
+                    start: croncape php bin/console app:daily-sync
+            security-check:
+                # Check that no security issues have been found for PHP packages deployed in production
+                spec: '50 23 * * *'
+                commands:
+                    start: if [ "$PLATFORM_ENVIRONMENT_TYPE" = "production" ]; then croncape COMPOSER_ROOT_VERSION=1.0.0 COMPOSER_AUDIT_ABANDONED=ignore composer audit --no-cache; fi
+            clean-expired-sessions:
+                spec: '17,47 * * * *'
+                commands:
+                    start: croncape php-session-clean
+            cleanup-sync-logs:
+                spec: '15 3 * * *'
+                commands:
+                    start: croncape php bin/console app:cleanup-logs
+
+        workers:
+            messenger:
+                commands:
+                    start: "php bin/console messenger:consume async --time-limit=300 --memory-limit=128M"
+
+

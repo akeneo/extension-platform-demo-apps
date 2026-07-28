@@ -1,0 +1,251 @@
+{% extends 'base.njk' %}
+
+{% block title %}Sync Logs — Akeneo Marketplace{% endblock %}
+
+{% block body %}
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-800">Sync Logs</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Kept for 14 days</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <select id="type-filter" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400">
+                <option value="">All types</option>
+                <option value="syncByUuid">By UUID</option>
+                <option value="syncByIdentifier">By Identifier</option>
+                <option value="syncByModelCode">By Model</option>
+                <option value="productUpdated">Webhook</option>
+                <option value="daily-sync">Daily Cron</option>
+                <option value="rejected">Rejected</option>
+            </select>
+            <select id="sort-order" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400">
+                <option value="desc">Newest first</option>
+                <option value="asc">Oldest first</option>
+            </select>
+            <select id="page-size" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400">
+                <option value="50">50 / page</option>
+                <option value="100" selected>100 / page</option>
+                <option value="200">200 / page</option>
+                <option value="500">500 / page</option>
+            </select>
+            <button id="refresh-btn" class="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 rounded-lg border border-indigo-200 hover:border-indigo-400 transition-colors">
+                ↻ Refresh
+            </button>
+        </div>
+    </div>
+
+    <div id="logs-loading" class="flex flex-col items-center justify-center py-32 text-gray-400">
+        <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+        <p class="text-sm">Loading logs…</p>
+    </div>
+
+    <div id="logs-content" class="hidden">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide w-36">Received</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide w-36">Finished</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide w-36">Type</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">Input</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide w-40">Status</th>
+                        <th class="text-right px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide w-24">API calls</th>
+                        <th class="text-right px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide w-24">Duration</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-tbody" class="divide-y divide-gray-100"></tbody>
+            </table>
+            <div id="logs-empty" class="hidden text-center py-16 text-gray-400">
+                <p class="text-4xl mb-3">📋</p>
+                <p class="text-sm font-medium">No sync jobs yet</p>
+                <p class="text-xs mt-1">Trigger a sync from Akeneo PIM to see entries here.</p>
+            </div>
+            <div id="logs-pagination" class="hidden flex items-center justify-between px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
+                <span id="pg-range">—</span>
+                <div class="flex items-center gap-2">
+                    <button id="pg-prev" class="px-2.5 py-1 rounded border border-gray-200 text-gray-600 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed">← Newer</button>
+                    <button id="pg-next" class="px-2.5 py-1 rounded border border-gray-200 text-gray-600 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed">Older →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="logs-error" class="hidden text-center py-20 text-gray-400">
+        <div class="text-5xl mb-4">⚠️</div>
+        <p class="text-lg font-medium text-gray-600">Failed to load logs</p>
+        <p class="text-sm mt-1">Check the console for details.</p>
+    </div>
+
+</main>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    const loading = document.getElementById('logs-loading');
+    const content = document.getElementById('logs-content');
+    const errorEl = document.getElementById('logs-error');
+    const tbody   = document.getElementById('logs-tbody');
+    const empty   = document.getElementById('logs-empty');
+    const typeFilter = document.getElementById('type-filter');
+    const sortOrder   = document.getElementById('sort-order');
+    const pageSize    = document.getElementById('page-size');
+    const pagination  = document.getElementById('logs-pagination');
+    const pgRange = document.getElementById('pg-range');
+    const pgPrev  = document.getElementById('pg-prev');
+    const pgNext  = document.getElementById('pg-next');
+
+    const TYPE_LABELS = {
+        syncByUuid:       'By UUID',
+        syncByIdentifier: 'By Identifier',
+        syncByModelCode:  'By Model',
+        productUpdated:   'Webhook',
+        'daily-sync':     'Daily Cron',
+        rejected:         'Rejected',
+    };
+
+    const STATUS = {
+        queued:    { text: 'Queued',    cls: 'bg-gray-100 text-gray-600',   dot: 'bg-gray-400' },
+        running:   { text: 'Running',   cls: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+        completed: { text: 'Completed', cls: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
+        failed:    { text: 'Failed',    cls: 'bg-red-100 text-red-700',     dot: 'bg-red-500' },
+    };
+
+    function esc(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // Absolute wall-clock time, so two rows can be compared by eye. Shows the date
+    // too when it's not today, since logs are now kept for 14 days.
+    function fmtAbs(ms) {
+        if (!ms) return '—';
+        const d = new Date(ms);
+        const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const sameDay = d.toDateString() === new Date().toDateString();
+        return sameDay ? time : d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + time;
+    }
+
+    function fmtDuration(ms) {
+        if (ms === null || ms === undefined) return '—';
+        if (ms < 1000)  return ms + ' ms';
+        const totalSec = Math.round(ms / 1000);
+        if (totalSec < 60) return totalSec + 's';
+        const min = Math.floor(totalSec / 60);
+        const sec = totalSec % 60;
+        if (min < 60) return min + 'm ' + sec + 's';
+        return Math.floor(min / 60) + 'h ' + (min % 60) + 'm';
+    }
+
+    function renderRows(entries) {
+        if (!entries.length) {
+            empty.classList.remove('hidden');
+            tbody.innerHTML = '';
+            return;
+        }
+        empty.classList.add('hidden');
+
+        const html = entries.map(e => {
+            const st = STATUS[e.status] ?? STATUS.queued;
+            const receivedIso = e.queuedAt ? new Date(e.queuedAt).toISOString() : '';
+            const finishedIso = e.finishedAt ? new Date(e.finishedAt).toISOString() : '';
+            const spinnerHtml = e.status === 'running'
+                ? `<span class="inline-block w-2 h-2 rounded-full ${st.dot} animate-pulse mr-1"></span>`
+                : `<span class="inline-block w-2 h-2 rounded-full ${st.dot} mr-1"></span>`;
+
+            const errorHtml = e.error
+                ? `<p class="mt-1 text-xs text-red-500 font-mono break-all line-clamp-2" title="${esc(e.error)}">${esc(e.error)}</p>`
+                : '';
+
+            return `<tr class="hover:bg-gray-50 transition-colors align-top">
+                <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap font-mono" title="${esc(receivedIso)}">${fmtAbs(e.queuedAt)}</td>
+                <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap font-mono" title="${esc(finishedIso)}">${fmtAbs(e.finishedAt)}</td>
+                <td class="px-4 py-3 text-gray-700 font-medium text-xs whitespace-nowrap">${esc(TYPE_LABELS[e.type] ?? e.type)}</td>
+                <td class="px-4 py-3 text-gray-500 text-xs max-w-xs">
+                    <span class="block font-mono break-all cursor-pointer" title="Click to expand"
+                          onclick="this.classList.toggle('line-clamp-2')">${esc(e.input)}</span>
+                </td>
+                <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${st.cls}">
+                        ${spinnerHtml}${esc(st.text)}
+                    </span>
+                    ${errorHtml}
+                </td>
+                <td class="px-4 py-3 text-right text-gray-700 text-xs font-medium">${e.apiCalls !== null && e.apiCalls !== undefined ? e.apiCalls : '—'}</td>
+                <td class="px-4 py-3 text-right text-gray-400 text-xs whitespace-nowrap">${fmtDuration(e.duration)}</td>
+            </tr>`;
+        }).join('');
+
+        tbody.innerHTML = html;
+    }
+
+    function renderPagination(total, limit, offset) {
+        if (!total) {
+            pagination.classList.add('hidden');
+            return;
+        }
+        pagination.classList.remove('hidden');
+        const from = offset + 1;
+        const to = Math.min(offset + limit, total);
+        pgRange.textContent = `${from}–${to} of ${total}`;
+        pgPrev.disabled = offset <= 0;
+        pgNext.disabled = offset + limit >= total;
+    }
+
+    let initialized = false;
+    let offset = 0;
+
+    async function load() {
+        const limit = parseInt(pageSize.value, 10);
+        const params = new URLSearchParams({ limit, offset, order: sortOrder.value });
+        if (typeFilter.value) params.set('type', typeFilter.value);
+
+        try {
+            const res = await fetch('/api/logs?' + params.toString());
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            if (!initialized) {
+                initialized = true;
+                loading.classList.add('hidden');
+                content.classList.remove('hidden');
+            }
+
+            renderRows(data.entries);
+            renderPagination(data.total, data.limit, data.offset);
+        } catch (err) {
+            console.error('Logs error:', err);
+            if (!initialized) {
+                loading.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+            }
+        }
+    }
+
+    function resetAndLoad() {
+        offset = 0;
+        load();
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', load);
+    typeFilter.addEventListener('change', resetAndLoad);
+    sortOrder.addEventListener('change', resetAndLoad);
+    pageSize.addEventListener('change', resetAndLoad);
+    pgPrev.addEventListener('click', () => {
+        offset = Math.max(0, offset - parseInt(pageSize.value, 10));
+        load();
+    });
+    pgNext.addEventListener('click', () => {
+        offset += parseInt(pageSize.value, 10);
+        load();
+    });
+
+    load();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{
+  "rate": 5,
+  "targetDurationSec": 900,
+  "elapsedSec": 907,
+  "sent": 4526,
+  "succeeded": 4525,
+  "failed": 0,
+  "timedOut": 0,
+  "successRatePct": 99.98,
+  "statusCounts": {
+    "200": 4525
+  },
+  "latencyMs": {
+    "p50": 53,
+    "p95": 68,
+    "p99": 97,
+    "max": 406
+  },
+  "complete": true,
+  "updatedAt": "2026-07-28T10:09:24.114Z"
+}

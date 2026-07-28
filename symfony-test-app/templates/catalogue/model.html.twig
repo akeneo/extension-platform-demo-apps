@@ -1,0 +1,263 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ model_label }}{% endblock %}
+
+{% block body %}
+<main class="max-w-4xl mx-auto px-6 py-8">
+
+    {# Breadcrumb #}
+    <nav class="mb-6 flex items-center gap-2 text-sm text-gray-500">
+        <a href="/" class="hover:text-blue-600 transition-colors">Catalogue</a>
+        <span>›</span>
+        <span class="text-gray-800 font-medium truncate">{{ model_label }}</span>
+    </nav>
+
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+
+        {# Image block — updated by JS when variant changes #}
+        <div id="image-block">
+            <div class="w-full h-72 bg-gray-100 flex items-center justify-center text-6xl text-gray-300">📷</div>
+        </div>
+
+        <div class="p-6">
+            <p class="text-xs text-gray-400 font-mono mb-2">{{ model_code }}</p>
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ model_label }}</h1>
+
+            {# Variant selector #}
+            {% if variants|length > 1 %}
+            <div class="mb-5">
+                <label for="variant-select" class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Variation</label>
+                <select id="variant-select"
+                        onchange="selectVariant(this.value)"
+                        class="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                    {% for v in variants %}
+                        <option value="{{ loop.index0 }}">{{ v.variation_label ?? v.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            {# Categories — union of all variants #}
+            {% set all_cats = [] %}
+            {% for v in variants %}{% for cat in v.categories %}{% if cat.code not in all_cats %}
+                {% set all_cats = all_cats|merge([cat.code]) %}
+            {% endif %}{% endfor %}{% endfor %}
+            {% set cat_map = {} %}
+            {% for v in variants %}{% for cat in v.categories %}{% set cat_map = cat_map|merge({(cat.code): cat.label}) %}{% endfor %}{% endfor %}
+            {% if all_cats|length > 0 %}
+            <div class="flex flex-wrap gap-2 mb-5">
+                {% for code in all_cats %}
+                    <span class="text-sm bg-blue-50 text-blue-600 px-3 py-0.5 rounded-full">{{ cat_map[code] ?? code }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# Price — updated by JS #}
+            <div id="price-block" class="mb-5 hidden">
+                <span id="price-value" class="text-3xl font-bold text-gray-900"></span>
+            </div>
+
+            {# Stock — updated by JS #}
+            <div class="mb-5">
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Stock</p>
+                <span id="stock-badge"></span>
+            </div>
+
+            {# Description — updated by JS #}
+            <div id="description-block" class="mb-5 hidden">
+                <p id="description-text" class="text-gray-600 text-sm leading-relaxed"></p>
+            </div>
+
+            {# Status badges — updated by JS #}
+            <div class="flex flex-wrap items-center gap-4 mb-6">
+                <span id="enabled-badge"></span>
+                <span id="completeness-badge" class="text-sm text-gray-500 hidden"></span>
+                <span id="synced-badge" class="text-sm text-gray-400 hidden"></span>
+            </div>
+
+            {# Actions #}
+            <div class="flex flex-wrap gap-3">
+                <button id="btn-remove-variant"
+                        onclick="removeCurrentVariant()"
+                        class="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                    Remove this variant
+                </button>
+                <button onclick="removeModel('{{ model_code|e('js') }}')"
+                        class="px-4 py-2 text-sm font-medium text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    Remove all variants
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+{% block javascripts %}
+<script>
+const variants = {{ variants|json_encode|raw }};
+let currentIndex = 0;
+
+function buildImageBlock(urls) {
+    if (!urls || urls.length === 0) {
+        return `<div class="w-full h-72 bg-gray-100 flex items-center justify-center text-6xl text-gray-300">📷</div>`;
+    }
+    if (urls.length === 1) {
+        return `<img src="${urls[0]}" alt="" class="w-full h-72 object-cover">`;
+    }
+    const slides = urls.map((url, i) =>
+        `<img src="${url}" alt="" class="absolute inset-0 w-full h-72 object-cover transition-opacity duration-300 ${i === 0 ? 'opacity-100' : 'opacity-0'}" data-slide="${i}">`
+    ).join('');
+    const dots = urls.map((_, i) =>
+        `<button onclick="carouselTo('main',${i})" data-dot="${i}" class="w-2.5 h-2.5 rounded-full transition-colors ${i === 0 ? 'bg-white' : 'bg-white/50'}"></button>`
+    ).join('');
+    return `
+        <div class="relative h-72 overflow-hidden" data-carousel="main">
+            ${slides}
+            <button onclick="carouselPrev('main')" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center text-base leading-none">&#8249;</button>
+            <button onclick="carouselNext('main')" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center text-base leading-none">&#8250;</button>
+            <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">${dots}</div>
+        </div>`;
+}
+
+let carouselState = {};
+
+function carouselTo(id, index) {
+    const container = document.querySelector(`[data-carousel="${id}"]`);
+    if (!container) return;
+    carouselState[id] = index;
+    container.querySelectorAll('[data-slide]').forEach((s, i) => {
+        s.classList.toggle('opacity-100', i === index);
+        s.classList.toggle('opacity-0', i !== index);
+    });
+    container.querySelectorAll('[data-dot]').forEach((d, i) => {
+        d.classList.toggle('bg-white', i === index);
+        d.classList.toggle('bg-white/50', i !== index);
+    });
+}
+function carouselNext(id) {
+    const c = document.querySelector(`[data-carousel="${id}"]`);
+    if (!c) return;
+    carouselTo(id, ((carouselState[id] ?? 0) + 1) % c.querySelectorAll('[data-slide]').length);
+}
+function carouselPrev(id) {
+    const c = document.querySelector(`[data-carousel="${id}"]`);
+    if (!c) return;
+    const n = c.querySelectorAll('[data-slide]').length;
+    carouselTo(id, ((carouselState[id] ?? 0) - 1 + n) % n);
+}
+
+function selectVariant(index) {
+    currentIndex = parseInt(index, 10);
+    carouselState = {};
+    const v = variants[currentIndex];
+
+    // Image
+    document.getElementById('image-block').innerHTML = buildImageBlock(v.image_urls);
+
+    // Price
+    const priceBlock = document.getElementById('price-block');
+    const priceValue = document.getElementById('price-value');
+    if (v.price !== null && v.price !== undefined) {
+        priceValue.textContent = '$' + v.price.toFixed(2);
+        priceBlock.classList.remove('hidden');
+    } else {
+        priceBlock.classList.add('hidden');
+    }
+
+    // Stock
+    const stockBadge = document.getElementById('stock-badge');
+    if (v.stock !== null && v.stock !== undefined) {
+        if (v.stock === 0) {
+            stockBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-50 text-red-600';
+            stockBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-400"></span>Out of stock';
+        } else if (v.stock <= 5) {
+            stockBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-amber-50 text-amber-700';
+            stockBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400"></span>' + v.stock + ' left in stock';
+        } else {
+            stockBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700';
+            stockBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-400"></span>' + v.stock + ' in stock';
+        }
+    } else {
+        stockBadge.className = 'text-sm text-gray-400';
+        stockBadge.textContent = '—';
+    }
+
+    // Description
+    const descBlock = document.getElementById('description-block');
+    const descText  = document.getElementById('description-text');
+    if (v.description) {
+        descText.textContent = v.description;
+        descBlock.classList.remove('hidden');
+    } else {
+        descBlock.classList.add('hidden');
+    }
+
+    // Enabled badge
+    const badge = document.getElementById('enabled-badge');
+    badge.className = v.enabled
+        ? 'px-3 py-1 text-sm font-medium bg-green-100 text-green-700 rounded-full'
+        : 'px-3 py-1 text-sm font-medium bg-gray-100 text-gray-500 rounded-full';
+    badge.textContent = v.enabled ? 'Enabled' : 'Disabled';
+
+    // Completeness
+    const compBadge = document.getElementById('completeness-badge');
+    if (v.completeness !== null && v.completeness !== undefined) {
+        compBadge.textContent = `${Math.round(v.completeness)}% complete`;
+        compBadge.classList.remove('hidden');
+    } else {
+        compBadge.classList.add('hidden');
+    }
+
+    // Synced at
+    const syncBadge = document.getElementById('synced-badge');
+    if (v.synced_at) {
+        const d = new Date(v.synced_at);
+        syncBadge.textContent = 'Synced ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        syncBadge.classList.remove('hidden');
+    } else {
+        syncBadge.classList.add('hidden');
+    }
+}
+
+async function removeCurrentVariant() {
+    const v = variants[currentIndex];
+    if (!confirm(`Remove variant "${v.variation_label || v.label}" from the catalogue?`)) return;
+    try {
+        const res = await fetch('/api/products/' + encodeURIComponent(v.identifier), { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        variants.splice(currentIndex, 1);
+        if (variants.length === 0) {
+            window.location.href = '/';
+            return;
+        }
+        currentIndex = Math.min(currentIndex, variants.length - 1);
+        // Rebuild the select options
+        const sel = document.getElementById('variant-select');
+        if (sel) {
+            sel.innerHTML = variants.map((v, i) =>
+                `<option value="${i}">${v.variation_label || v.label}</option>`
+            ).join('');
+            sel.value = currentIndex;
+        }
+        selectVariant(currentIndex);
+    } catch (e) {
+        alert('Failed to remove variant');
+    }
+}
+
+async function removeModel(modelCode) {
+    if (!confirm('Remove all variants of this model from the catalogue?')) return;
+    try {
+        const res = await fetch('/api/model/' + encodeURIComponent(modelCode), { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        window.location.href = '/';
+    } catch (e) {
+        alert('Failed to remove model');
+    }
+}
+
+// Init with first variant
+selectVariant(0);
+</script>
+{% endblock %}
+{% endblock %}

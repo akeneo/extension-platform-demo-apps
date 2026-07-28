@@ -1,0 +1,87 @@
+routes:
+    "https://{all}/": { type: upstream, upstream: "app:http" }
+    "http://{all}/": { type: redirect, to: "https://{all}/" }
+
+services:
+    database:
+        type: postgresql:15
+
+    cache:
+        type: redis:7.2
+        configuration:
+            maxmemory_policy: volatile-lru
+
+    queue:
+        type: rabbitmq:3.12
+
+applications:
+    app:
+        source:
+            root: "/"
+
+        type: nodejs:22
+
+        relationships:
+            database: "database:postgresql"
+            cache: "cache:redis"
+            queue: "queue:rabbitmq"
+
+        variables:
+            env:
+                NODE_ENV: production
+                PRODUCT_IMAGES_DIR: /app/var/product-images
+                STOCK_API_URL: https://main-bvxea6i-76safdhxbwlwa.eu-5.platformsh.site/stocks/random
+
+        build:
+            flavor: none
+
+        web:
+            commands:
+                start: "bash start.sh"
+            locations:
+                "/":
+                    passthru: true
+                    allow: false
+                "/images/":
+                    root: "var/product-images"
+                    expires: 1d
+                    allow: true
+
+        mounts:
+            "/var/product-images": { source: storage, source_path: product-images }
+
+        hooks:
+            build: |
+                set -x -e
+                npm ci --include=dev
+                npx prisma generate
+                npm run build
+
+            deploy: |
+                set -x -e
+                export DATABASE_URL="postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_PATH}"
+                npx prisma migrate deploy
+
+        crons:
+            daily-sync:
+                spec: '0 2 * * *'
+                commands:
+                    start: |
+                        export DATABASE_URL="postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_PATH}"
+                        export RABBITMQ_URL="${QUEUE_SCHEME:-amqp}://${QUEUE_USERNAME:-guest}:${QUEUE_PASSWORD:-guest}@${QUEUE_HOST:-localhost}:${QUEUE_PORT:-5672}/${QUEUE_PATH}"
+                        node dist/commands/dailySync.js
+            cleanup-sync-logs:
+                spec: '15 3 * * *'
+                commands:
+                    start: |
+                        export DATABASE_URL="postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_PATH}"
+                        node dist/commands/cleanupLogs.js
+
+        workers:
+            sync:
+                commands:
+                    start: |
+                        export DATABASE_URL="postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_PATH}"
+                        export REDIS_URL="${CACHE_SCHEME:-redis}://${CACHE_HOST:-localhost}:${CACHE_PORT:-6379}"
+                        export RABBITMQ_URL="${QUEUE_SCHEME:-amqp}://${QUEUE_USERNAME:-guest}:${QUEUE_PASSWORD:-guest}@${QUEUE_HOST:-localhost}:${QUEUE_PORT:-5672}/${QUEUE_PATH}"
+                        exec node dist/workers/syncWorker.js

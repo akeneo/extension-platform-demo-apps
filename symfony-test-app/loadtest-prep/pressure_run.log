@@ -1,0 +1,31 @@
+Starting Symfony webhook pressure test: rate=5/sec, duration=900s, real UUIDs=571, output=pressure_result.json
+[30s] sent=149 succeeded=149 failed=0 timedOut=0 successRate=100% p50=52 p95=68 p99=214
+[60s] sent=299 succeeded=299 failed=0 timedOut=0 successRate=100% p50=52 p95=66 p99=138
+[90s] sent=449 succeeded=448 failed=0 timedOut=0 successRate=99.78% p50=52 p95=59 p99=96
+[120s] sent=598 succeeded=598 failed=0 timedOut=0 successRate=100% p50=52 p95=61 p99=81
+[150s] sent=748 succeeded=747 failed=0 timedOut=0 successRate=99.87% p50=52 p95=62 p99=81
+[180s] sent=898 succeeded=898 failed=0 timedOut=0 successRate=100% p50=52 p95=63 p99=103
+[210s] sent=1047 succeeded=1047 failed=0 timedOut=0 successRate=100% p50=52 p95=64 p99=96
+[240s] sent=1197 succeeded=1197 failed=0 timedOut=0 successRate=100% p50=52 p95=64 p99=98
+[270s] sent=1347 succeeded=1346 failed=0 timedOut=0 successRate=99.93% p50=52 p95=63 p99=95
+[300s] sent=1496 succeeded=1496 failed=0 timedOut=0 successRate=100% p50=52 p95=63 p99=95
+[330s] sent=1646 succeeded=1646 failed=0 timedOut=0 successRate=100% p50=52 p95=63 p99=95
+[360s] sent=1796 succeeded=1796 failed=0 timedOut=0 successRate=100% p50=52 p95=63 p99=95
+[390s] sent=1946 succeeded=1945 failed=0 timedOut=0 successRate=99.95% p50=53 p95=66 p99=93
+[420s] sent=2095 succeeded=2095 failed=0 timedOut=0 successRate=100% p50=53 p95=66 p99=93
+[450s] sent=2245 succeeded=2245 failed=0 timedOut=0 successRate=100% p50=53 p95=68 p99=92
+[480s] sent=2395 succeeded=2394 failed=0 timedOut=0 successRate=99.96% p50=53 p95=69 p99=98
+[510s] sent=2544 succeeded=2544 failed=0 timedOut=0 successRate=100% p50=53 p95=68 p99=96
+[540s] sent=2694 succeeded=2694 failed=0 timedOut=0 successRate=100% p50=53 p95=68 p99=98
+[570s] sent=2844 succeeded=2843 failed=0 timedOut=0 successRate=99.96% p50=53 p95=68 p99=98
+[600s] sent=2993 succeeded=2993 failed=0 timedOut=0 successRate=100% p50=53 p95=68 p99=98
+[630s] sent=3143 succeeded=3143 failed=0 timedOut=0 successRate=100% p50=53 p95=68 p99=96
+[660s] sent=3293 succeeded=3293 failed=0 timedOut=0 successRate=100% p50=53 p95=67 p99=96
+[690s] sent=3443 succeeded=3442 failed=0 timedOut=0 successRate=99.97% p50=53 p95=68 p99=95
+[720s] sent=3592 succeeded=3592 failed=0 timedOut=0 successRate=100% p50=53 p95=68 p99=96
+[750s] sent=3742 succeeded=3742 failed=0 timedOut=0 successRate=100% p50=53 p95=69 p99=96
+[780s] sent=3892 succeeded=3892 failed=0 timedOut=0 successRate=100% p50=53 p95=70 p99=101
+[810s] sent=4042 succeeded=4041 failed=0 timedOut=0 successRate=99.98% p50=53 p95=69 p99=98
+[840s] sent=4191 succeeded=4191 failed=0 timedOut=0 successRate=100% p50=53 p95=69 p99=98
+[870s] sent=4341 succeeded=4341 failed=0 timedOut=0 successRate=100% p50=53 p95=69 p99=98
+DONE sent=4526 succeeded=4525 failed=0 timedOut=0 successRate=99.98%

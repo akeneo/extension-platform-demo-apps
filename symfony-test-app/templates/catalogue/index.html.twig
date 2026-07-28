@@ -1,0 +1,319 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Product Catalogue{% endblock %}
+
+{% block body %}
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+    {# Filters #}
+    <div class="sticky top-[73px] z-40 bg-white rounded-xl border border-gray-200 p-4 mb-6 flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+            <label for="filter-category" class="text-sm font-medium text-gray-600">Category</label>
+            <select id="filter-category"
+                    class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.code }}">{{ cat.label ?? cat.code }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <label for="filter-enabled" class="text-sm font-medium text-gray-600">Status</label>
+            <select id="filter-enabled"
+                    class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All</option>
+                <option value="1">Enabled</option>
+                <option value="0">Disabled</option>
+            </select>
+        </div>
+
+        <div class="ml-auto flex items-center gap-3">
+            <span class="text-sm text-gray-500"><span id="count-loaded">0</span> / <span id="count-total">0</span> products</span>
+            <button onclick="removeAll()"
+                    class="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                Remove all
+            </button>
+        </div>
+    </div>
+
+    {# Product grid #}
+    <div id="product-grid"
+         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+    </div>
+
+    {# Empty state #}
+    <div id="empty-state" class="hidden text-center py-20 text-gray-400">
+        <div class="text-5xl mb-4">📦</div>
+        <p class="text-lg font-medium">No products found</p>
+        <p class="text-sm mt-1">Try adjusting the filters or sync products from Akeneo PIM.</p>
+    </div>
+
+    {# Load more #}
+    <div class="mt-8 text-center">
+        <button id="load-more"
+                class="hidden px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                onclick="loadMore()">
+            Load more
+        </button>
+        <div id="loading-spinner" class="hidden mx-auto w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+    </div>
+
+</main>
+
+{% block javascripts %}
+<script>
+function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let currentPage = 0;
+let isLoading = false;
+let hasMore = true;
+
+const grid = document.getElementById('product-grid');
+const emptyState = document.getElementById('empty-state');
+const loadMoreBtn = document.getElementById('load-more');
+const spinner = document.getElementById('loading-spinner');
+const countLoaded = document.getElementById('count-loaded');
+const countTotal = document.getElementById('count-total');
+
+function getFilters() {
+    return {
+        category: document.getElementById('filter-category').value,
+        enabled: document.getElementById('filter-enabled').value,
+    };
+}
+
+function buildUrl(page) {
+    const { category, enabled } = getFilters();
+    const params = new URLSearchParams({ page });
+    if (category) params.set('category', category);
+    if (enabled !== '') params.set('enabled', enabled);
+    return '/api/products?' + params.toString();
+}
+
+let carouselState = {};
+
+function carouselHtml(id, urls) {
+    if (!urls || urls.length === 0) {
+        return `<div class="w-full h-48 bg-gray-100 flex items-center justify-center text-4xl text-gray-300">📷</div>`;
+    }
+    if (urls.length === 1) {
+        return `<img src="${urls[0]}" alt="" class="w-full h-48 object-cover">`;
+    }
+    const slides = urls.map((url, i) =>
+        `<img src="${url}" alt="" class="absolute inset-0 w-full h-48 object-cover transition-opacity duration-300 ${i === 0 ? 'opacity-100' : 'opacity-0'}" data-slide="${i}">`
+    ).join('');
+    const dots = urls.map((_, i) =>
+        `<button onclick="event.stopPropagation(); carouselTo('${id}',${i})" data-dot="${i}" class="w-2 h-2 rounded-full transition-colors ${i === 0 ? 'bg-white' : 'bg-white/50'}"></button>`
+    ).join('');
+    return `
+        <div class="relative h-48 overflow-hidden" data-carousel="${id}">
+            ${slides}
+            <button onclick="event.stopPropagation(); carouselPrev('${id}')" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs leading-none">&#8249;</button>
+            <button onclick="event.stopPropagation(); carouselNext('${id}')" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs leading-none">&#8250;</button>
+            <div class="absolute bottom-2 left-0 right-0 flex justify-center gap-1" data-dots="${id}">${dots}</div>
+        </div>`;
+}
+
+function carouselTo(id, index) {
+    const container = document.querySelector(`[data-carousel="${id}"]`);
+    if (!container) return;
+    const slides = container.querySelectorAll('[data-slide]');
+    const dots = container.querySelectorAll('[data-dot]');
+    carouselState[id] = index;
+    slides.forEach((s, i) => {
+        s.classList.toggle('opacity-100', i === index);
+        s.classList.toggle('opacity-0', i !== index);
+    });
+    dots.forEach((d, i) => {
+        d.classList.toggle('bg-white', i === index);
+        d.classList.toggle('bg-white/50', i !== index);
+    });
+}
+
+function carouselNext(id) {
+    const container = document.querySelector(`[data-carousel="${id}"]`);
+    if (!container) return;
+    const total = container.querySelectorAll('[data-slide]').length;
+    carouselTo(id, ((carouselState[id] ?? 0) + 1) % total);
+}
+
+function carouselPrev(id) {
+    const container = document.querySelector(`[data-carousel="${id}"]`);
+    if (!container) return;
+    const total = container.querySelectorAll('[data-slide]').length;
+    carouselTo(id, ((carouselState[id] ?? 0) - 1 + total) % total);
+}
+
+function cardHtml(p) {
+    const carouselId = 'c-' + p.identifier.replace(/[^a-zA-Z0-9]/g, '_');
+    const imageBlock = carouselHtml(carouselId, p.image_urls);
+    const href = '/product/' + encodeURIComponent(p.identifier);
+
+    const enabledBadge = p.enabled
+        ? `<span class="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">Enabled</span>`
+        : `<span class="inline-block px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-500 rounded-full">Disabled</span>`;
+
+    const cats = (p.categories || []).map(c =>
+        `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">${c.label}</span>`
+    ).join('');
+
+    return `
+        <article class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                 data-identifier="${p.identifier}" onclick="location.href='${href}'">
+            ${imageBlock}
+            <div class="p-3">
+                <p class="text-xs text-gray-400 font-mono mb-0.5 truncate">${escapeHtml(p.identifier)}</p>
+                <h2 class="font-medium text-gray-800 text-sm leading-snug line-clamp-2 mb-2">${escapeHtml(p.label)}</h2>
+                <div class="flex flex-wrap gap-1 mb-2">${cats}</div>
+                <div class="flex items-center justify-between">
+                    ${enabledBadge}
+                    ${p.completeness !== null ? `<span class="text-xs text-gray-400">${Math.round(p.completeness)}%</span>` : ''}
+                </div>
+                <div class="mt-2 text-right">
+                    <button onclick="event.stopPropagation(); removeProduct('${p.identifier}')"
+                            class="text-xs text-red-400 hover:text-red-600 transition-colors">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </article>`;
+}
+
+function modelCardHtml(m) {
+    const carouselId = 'c-model-' + m.parent.replace(/[^a-zA-Z0-9]/g, '_');
+    const imageBlock = carouselHtml(carouselId, m.image_urls);
+    const href = '/model/' + encodeURIComponent(m.parent);
+
+    const cats = (m.categories || []).map(c =>
+        `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">${c.label}</span>`
+    ).join('');
+
+    return `
+        <article class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                 onclick="location.href='${href}'">
+            <div class="relative">
+                ${imageBlock}
+                <span class="absolute top-2 right-2 bg-purple-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full pointer-events-none">
+                    ${m.variant_count} variant${m.variant_count > 1 ? 's' : ''}
+                </span>
+            </div>
+            <div class="p-3">
+                <p class="text-xs text-gray-400 font-mono mb-0.5 truncate">${escapeHtml(m.parent)}</p>
+                <h2 class="font-medium text-gray-800 text-sm leading-snug line-clamp-2 mb-2">${escapeHtml(m.parent_label)}</h2>
+                <div class="flex flex-wrap gap-1 mb-2">${cats}</div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">${m.enabled_count}/${m.variant_count} enabled</span>
+                    <button onclick="event.stopPropagation(); removeModel('${m.parent}')"
+                            class="text-xs text-red-400 hover:text-red-600 transition-colors">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </article>`;
+}
+
+async function loadPage(page, replace = false) {
+    if (isLoading) return;
+    isLoading = true;
+    spinner.classList.remove('hidden');
+    loadMoreBtn.classList.add('hidden');
+
+    try {
+        const res = await fetch(buildUrl(page));
+        if (!res.ok) throw new Error('Request failed');
+        const data = await res.json();
+
+        if (replace) grid.innerHTML = '';
+
+        if (data.products.length === 0 && page === 1) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            grid.insertAdjacentHTML('beforeend', data.products.map(
+                entry => entry.type === 'model' ? modelCardHtml(entry) : cardHtml(entry)
+            ).join(''));
+        }
+
+        hasMore = data.has_more;
+        currentPage = page;
+        countLoaded.textContent = grid.children.length;
+        countTotal.textContent = data.total;
+
+        if (hasMore) loadMoreBtn.classList.remove('hidden');
+    } catch (e) {
+        console.error(e);
+    } finally {
+        isLoading = false;
+        spinner.classList.add('hidden');
+    }
+}
+
+function loadMore() {
+    loadPage(currentPage + 1);
+}
+
+async function removeAll() {
+    const total = parseInt(countTotal.textContent) || 0;
+    if (total === 0) return;
+    if (!confirm(`Remove all ${total} products from the catalogue? This cannot be undone.`)) return;
+    try {
+        const res = await fetch('/api/products', { method: 'DELETE' });
+        if (!res.ok) throw new Error('Request failed');
+        grid.innerHTML = '';
+        countLoaded.textContent = '0';
+        countTotal.textContent = '0';
+        loadMoreBtn.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+    } catch (e) {
+        console.error(e);
+        alert('Failed to remove all products');
+    }
+}
+
+async function removeProduct(identifier) {
+    if (!confirm('Remove this product from the catalogue?')) return;
+    try {
+        const res = await fetch('/api/products/' + encodeURIComponent(identifier), { method: 'DELETE' });
+        if (!res.ok) throw new Error('Request failed');
+        const card = document.querySelector(`[data-identifier="${identifier}"]`);
+        if (card) {
+            card.remove();
+            countLoaded.textContent = grid.children.length;
+            countTotal.textContent = Math.max(0, parseInt(countTotal.textContent) - 1);
+            if (grid.children.length === 0) emptyState.classList.remove('hidden');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Failed to remove product');
+    }
+}
+
+async function removeModel(parentCode) {
+    if (!confirm(`Remove all variants of this model from the catalogue?`)) return;
+    try {
+        const res = await fetch('/api/model/' + encodeURIComponent(parentCode), { method: 'DELETE' });
+        if (!res.ok) throw new Error('Request failed');
+        resetAndLoad();
+    } catch (e) {
+        console.error(e);
+        alert('Failed to remove model');
+    }
+}
+
+function resetAndLoad() {
+    currentPage = 0;
+    hasMore = true;
+    loadPage(1, true);
+}
+
+document.getElementById('filter-category').addEventListener('change', resetAndLoad);
+document.getElementById('filter-enabled').addEventListener('change', resetAndLoad);
+
+// Initial load
+loadPage(1, true);
+</script>
+{% endblock %}
+{% endblock %}

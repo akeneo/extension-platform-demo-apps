@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Akeneo Marketplace{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🛍️</text></svg>">
+        <script src="https://cdn.tailwindcss.com"></script>
+        {% block stylesheets %}{% endblock %}
+
+        {% set frankenphpHotReload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
+        {% if frankenphpHotReload %}
+        <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
+        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
+        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+        {% endif %}
+    </head>
+    <body class="bg-gray-50 min-h-screen">
+        <header class="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4">
+            <div class="max-w-7xl mx-auto flex items-center gap-3">
+                <span class="text-2xl">🛍️</span>
+                <h1 class="text-xl font-semibold text-gray-800">Akeneo Marketplace</h1>
+                <nav class="ml-6 flex items-center gap-1">
+                    {% set path = app.request.pathinfo %}
+                    <a href="/"
+                       class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+                              {{ (path == '/' or path starts with '/product' or path starts with '/model') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800' }}">
+                        Catalogue
+                    </a>
+                    <a href="/stats"
+                       class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+                              {{ path starts with '/stats' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800' }}">
+                        Stats
+                    </a>
+                    <a href="/about"
+                       class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+                              {{ path starts with '/about' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800' }}">
+                        How it works
+                    </a>
+                    <a href="/logs"
+                       class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors
+                              {{ path starts with '/logs' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800' }}">
+                        Logs
+                    </a>
+                </nav>
+                <div class="ml-auto flex items-center gap-3">
+                    <span class="flex items-center gap-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full px-3 py-1">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
+                        PHP / Symfony
+                    </span>
+                    <div id="sync-indicator"
+                         class="hidden items-center gap-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
+                        <div class="w-3 h-3 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin shrink-0"></div>
+                        <span id="sync-indicator-label">Syncing…</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <script>
+        (function () {
+            const indicator = document.getElementById('sync-indicator');
+            const label = document.getElementById('sync-indicator-label');
+            let wasSyncing = false;
+
+            async function checkSync() {
+                try {
+                    const res = await fetch('/api/sync/status');
+                    if (!res.ok) return;
+                    const { in_progress, pending, processing } = await res.json();
+
+                    if (in_progress) {
+                        const parts = [];
+                        if (processing > 0) parts.push(processing + ' processing');
+                        if (pending > 0)    parts.push(pending + ' queued');
+                        label.textContent = 'Syncing (' + parts.join(', ') + ')…';
+                        indicator.classList.remove('hidden');
+                        indicator.classList.add('flex');
+                    } else {
+                        indicator.classList.add('hidden');
+                        indicator.classList.remove('flex');
+
+                        if (wasSyncing) {
+                            // Sync just finished — refresh catalogue data if on a catalogue page
+                            if (typeof resetAndLoad === 'function') {
+                                resetAndLoad();
+                            }
+                        }
+                    }
+
+                    wasSyncing = in_progress;
+                } catch (_) {}
+            }
+
+            checkSync();
+            setInterval(checkSync, 3000);
+        })();
+        </script>
+        {% block body %}{% endblock %}
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.label }}{% endblock %}
+
+{% block body %}
+<main class="max-w-4xl mx-auto px-6 py-8">
+
+    {# Breadcrumb #}
+    <nav class="mb-6 flex items-center gap-2 text-sm text-gray-500">
+        <a href="/" class="hover:text-blue-600 transition-colors">Catalogue</a>
+        <span>›</span>
+        <span class="text-gray-800 font-medium truncate">{{ product.label }}</span>
+    </nav>
+
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+
+        {# Image block #}
+        {% if product.image_urls|length == 0 %}
+            <div class="w-full h-72 bg-gray-100 flex items-center justify-center text-6xl text-gray-300">📷</div>
+        {% elseif product.image_urls|length == 1 %}
+            <img src="{{ product.image_urls[0] }}" alt="{{ product.label }}" class="w-full h-72 object-cover">
+        {% else %}
+            <div class="relative h-72 overflow-hidden" data-carousel="main">
+                {% for url in product.image_urls %}
+                    <img src="{{ url }}" alt="{{ product.label }}"
+                         class="absolute inset-0 w-full h-72 object-cover transition-opacity duration-300 {{ loop.first ? 'opacity-100' : 'opacity-0' }}"
+                         data-slide="{{ loop.index0 }}">
+                {% endfor %}
+                <button onclick="carouselPrev('main')"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center text-base leading-none">&#8249;</button>
+                <button onclick="carouselNext('main')"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center text-base leading-none">&#8250;</button>
+                <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                    {% for _ in product.image_urls %}
+                        <button onclick="carouselTo('main', {{ loop.index0 }})" data-dot="{{ loop.index0 }}"
+                                class="w-2.5 h-2.5 rounded-full transition-colors {{ loop.first ? 'bg-white' : 'bg-white/50' }}"></button>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {# Details #}
+        <div class="p-6">
+            <p class="text-xs text-gray-400 font-mono mb-2">{{ product.identifier }}</p>
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ product.label }}</h1>
+
+            {% if product.categories|length > 0 %}
+                <div class="flex flex-wrap gap-2 mb-5">
+                    {% for cat in product.categories %}
+                        <span class="text-sm bg-blue-50 text-blue-600 px-3 py-0.5 rounded-full">{{ cat.label }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Price #}
+            {% if product.price is not null %}
+                <div class="mb-5">
+                    <span class="text-3xl font-bold text-gray-900">${{ product.price|number_format(2) }}</span>
+                </div>
+            {% endif %}
+
+            {# Stock #}
+            <div class="mb-5">
+                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Stock</p>
+                {% if product.stock is not null %}
+                    {% if product.stock == 0 %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-50 text-red-600">
+                            <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                            Out of stock
+                        </span>
+                    {% elseif product.stock <= 5 %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-amber-50 text-amber-700">
+                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                            {{ product.stock }} left in stock
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700">
+                            <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                            {{ product.stock }} in stock
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <span class="text-sm text-gray-400">—</span>
+                {% endif %}
+            </div>
+
+            {# Description #}
+            {% if product.description %}
+                <div class="mb-6 prose prose-sm max-w-none text-gray-600 leading-relaxed">
+                    {{ product.description }}
+                </div>
+            {% endif %}
+
+            <div class="flex flex-wrap items-center gap-4 mb-6">
+                {% if product.enabled %}
+                    <span class="px-3 py-1 text-sm font-medium bg-green-100 text-green-700 rounded-full">Enabled</span>
+                {% else %}
+                    <span class="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-500 rounded-full">Disabled</span>
+                {% endif %}
+                {% if product.completeness is not null %}
+                    <span class="text-sm text-gray-500">{{ product.completeness|round }}% complete</span>
+                {% endif %}
+                {% if product.synced_at %}
+                    <span class="text-sm text-gray-400">Synced {{ product.synced_at|date('M d, Y H:i') }}</span>
+                {% endif %}
+            </div>
+
+            <button onclick="removeProduct('{{ product.identifier|e('js') }}')"
+                    class="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+                Remove from catalogue
+            </button>
+        </div>
+    </div>
+
+</main>
+
+{% block javascripts %}
+<script>
+let carouselState = {};
+
+function carouselTo(id, index) {
+    const container = document.querySelector(`[data-carousel="${id}"]`);
+    if (!container) return;
+    carouselState[id] = index;
+    container.querySelectorAll('[data-slide]').forEach((s, i) => {
+        s.classList.toggle('opacity-100', i === index);
+        s.classList.toggle('opacity-0', i !== index);
+    });
+    container.querySelectorAll('[data-dot]').forEach((d, i) => {
+        d.classList.toggle('bg-white', i === index);
+        d.classList.toggle('bg-white/50', i !== index);
+    });
+}
+function carouselNext(id) {
+    const c = document.querySelector(`[data-carousel="${id}"]`);
+    if (!c) return;
+    carouselTo(id, ((carouselState[id] ?? 0) + 1) % c.querySelectorAll('[data-slide]').length);
+}
+function carouselPrev(id) {
+    const c = document.querySelector(`[data-carousel="${id}"]`);
+    if (!c) return;
+    const n = c.querySelectorAll('[data-slide]').length;
+    carouselTo(id, ((carouselState[id] ?? 0) - 1 + n) % n);
+}
+
+async function removeProduct(identifier) {
+    if (!confirm('Remove this product from the catalogue?')) return;
+    try {
+        const res = await fetch('/api/products/' + encodeURIComponent(identifier), { method: 'DELETE' });
+        if (!res.ok) throw new Error('Request failed');
+        window.location.href = '/';
+    } catch (e) {
+        alert('Failed to remove product');
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

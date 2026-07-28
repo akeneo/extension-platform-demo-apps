@@ -1,0 +1,302 @@
+{% extends 'base.njk' %}
+
+{% block title %}How it works — Akeneo Marketplace{% endblock %}
+
+{% block body %}
+<main class="max-w-4xl mx-auto px-6 py-10">
+
+    <div class="mb-10">
+        <h1 class="text-3xl font-bold text-gray-900 mb-3">How it works</h1>
+        <p class="text-gray-500 text-base max-w-2xl">
+            This app is a <strong class="text-gray-700">Upsun platform template</strong> that demonstrates a Composable Commerce integration between an
+            <strong class="text-gray-700">Akeneo PIM</strong> and a Node.js/Express-based marketplace storefront.
+            Products are pushed from the PIM in three different ways and processed asynchronously by a dedicated worker.
+        </p>
+    </div>
+
+    <section class="mb-12">
+        <h2 class="text-lg font-semibold text-gray-800 mb-6">Sync triggers</h2>
+        <div class="grid gap-4 sm:grid-cols-3">
+
+            <div class="bg-white border border-indigo-200 rounded-xl p-5 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-xl mb-3">🔌</div>
+                <p class="font-semibold text-gray-900 text-sm">Action UI Extension</p>
+                <p class="text-xs text-gray-500 mt-1">
+                    User selects products in the PIM grid and clicks <em>Export to Marketplace</em>.
+                    Sends <code class="bg-gray-100 px-1 rounded">POST /api/products/sync</code> with
+                    an HMAC-SHA512 signature and product UUIDs.
+                </p>
+            </div>
+
+            <div class="bg-white border border-amber-200 rounded-xl p-5 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-xl mb-3">🔔</div>
+                <p class="font-semibold text-gray-900 text-sm">Product-updated Webhook</p>
+                <p class="text-xs text-gray-500 mt-1">
+                    The PIM sends a <code class="bg-gray-100 px-1 rounded">POST /webhook/product-updated</code>
+                    event whenever a product is saved. Signed with dual HMAC-SHA256 headers.
+                    The app only re-syncs the product if it already exists in the catalogue.
+                </p>
+            </div>
+
+            <div class="bg-white border border-green-200 rounded-xl p-5 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-xl mb-3">🕑</div>
+                <p class="font-semibold text-gray-900 text-sm">Daily cron</p>
+                <p class="text-xs text-gray-500 mt-1">
+                    Every night at 02:00 UTC the platform runs a cron job that re-queues all products
+                    already in the catalogue in batches of 50, keeping data fresh without manual action.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="mb-12">
+        <h2 class="text-lg font-semibold text-gray-800 mb-6">What happens after a sync is triggered</h2>
+        <div class="flex flex-col items-center gap-0">
+
+            <div class="w-full max-w-lg bg-white border border-indigo-200 rounded-xl p-5 shadow-sm">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-xl shrink-0">⚡</div>
+                    <div>
+                        <p class="font-semibold text-gray-900">Express App validates &amp; publishes</p>
+                        <p class="text-sm text-gray-500 mt-0.5">
+                            The endpoint verifies the HMAC signature, then immediately publishes a message
+                            (<code class="text-xs bg-gray-100 px-1 py-0.5 rounded">syncByUuid</code>,
+                            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">syncByIdentifier</code>, or
+                            <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">syncByModelCode</code>)
+                            to RabbitMQ. The HTTP response is immediate.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center py-1">
+                <div class="w-px h-4 bg-gray-300"></div>
+                <div class="text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-full px-3 py-0.5 my-1 whitespace-nowrap">
+                    Message dispatched to RabbitMQ (AMQP)
+                </div>
+                <div class="w-px h-4 bg-gray-300"></div>
+                <div class="text-gray-300 text-lg leading-none">▼</div>
+            </div>
+
+            <div class="w-full max-w-lg bg-white border border-amber-200 rounded-xl p-5 shadow-sm">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-xl shrink-0">⚙️</div>
+                    <div>
+                        <p class="font-semibold text-gray-900">Worker processes the message</p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            A dedicated Upsun worker container (<code class="bg-gray-100 px-1 rounded">app--sync</code>) consumes
+                            from RabbitMQ and runs these steps in order, retrying up to 3 times with 1s/2s/4s backoff on failure:
+                        </p>
+                        <ol class="mt-2 space-y-1 text-xs text-gray-500 list-decimal list-inside">
+                            <li>Fetch full product data from the Akeneo REST API (OAuth 2 client credentials).</li>
+                            <li>Upsert category labels into the local DB.</li>
+                            <li>Resolve parent model labels and variant axis attributes in one pass per model code.</li>
+                            <li>Enrich each variant with its axis attribute values (size, colour, etc.).</li>
+                            <li>Fetch price and stock for the whole batch concurrently, not one product at a time.</li>
+                            <li>Download product images to the shared NFS volume (<code class="bg-gray-100 px-1 rounded">/app/var/product-images</code>).</li>
+                            <li>Upsert the product record in PostgreSQL via Prisma.</li>
+                            <li>Invalidate the Redis catalogue cache so the next page view is fresh.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center py-1">
+                <div class="w-px h-4 bg-gray-300"></div>
+                <div class="text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-full px-3 py-0.5 my-1 whitespace-nowrap">
+                    Products &amp; images stored, catalogue cache invalidated
+                </div>
+                <div class="w-px h-4 bg-gray-300"></div>
+                <div class="text-gray-300 text-lg leading-none">▼</div>
+            </div>
+
+            <div class="w-full max-w-lg bg-white border border-blue-100 rounded-xl p-5 shadow-sm">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-xl shrink-0">🛍️</div>
+                    <div>
+                        <p class="font-semibold text-gray-900">Marketplace Catalogue updated</p>
+                        <p class="text-sm text-gray-500 mt-0.5">
+                            Simple products get their own card; variant products are grouped under their
+                            model with a shared card linking to a variant detail page. Images are served
+                            directly from the NFS volume under <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">/images/</code>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="mb-12">
+        <h2 class="text-lg font-semibold text-gray-800 mb-5">How to sync products manually</h2>
+        <ol class="space-y-4">
+            <li class="flex gap-4"><div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">1</div><div><p class="font-medium text-gray-800">Open the Akeneo PIM</p><p class="text-sm text-gray-500 mt-0.5">Navigate to the product grid or a product page in your Akeneo instance.</p></div></li>
+            <li class="flex gap-4"><div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">2</div><div><p class="font-medium text-gray-800">Select one or more products</p><p class="text-sm text-gray-500 mt-0.5">Tick the checkboxes for the products you want to export. Works with simple products, variants, and product models.</p></div></li>
+            <li class="flex gap-4"><div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">3</div><div><p class="font-medium text-gray-800">Click <em>Export to Marketplace</em></p><p class="text-sm text-gray-500 mt-0.5">The Action UI Extension button appears in the toolbar. It sends the selected product UUIDs to this app instantly.</p></div></li>
+            <li class="flex gap-4"><div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">4</div><div><p class="font-medium text-gray-800">Watch the sync indicator</p><p class="text-sm text-gray-500 mt-0.5">The amber spinner in the top navigation bar shows a sync is running. It disappears and refreshes the catalogue automatically when done.</p></div></li>
+            <li class="flex gap-4"><div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">5</div><div><p class="font-medium text-gray-800">Check the Logs page</p><p class="text-sm text-gray-500 mt-0.5">The <a href="/logs" class="text-indigo-600 hover:underline">Logs</a> page shows each sync attempt with its status, duration, and product count. Refresh it manually to see updates.</p></div></li>
+        </ol>
+    </section>
+
+    <section class="mb-12">
+        <h2 class="text-lg font-semibold text-gray-800 mb-2">How to set up</h2>
+        <p class="text-sm text-gray-500 mb-6">Three things need to be configured: an Akeneo API connection, an Action UI Extension, and an Event Platform subscription.</p>
+
+        <div class="mb-8">
+            <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">1 — Create an API connection in Akeneo</h3>
+            <p class="text-sm text-gray-500 mb-3">
+                In the PIM go to <strong class="text-gray-700">Connect › Connection settings</strong> and create a new connection.
+                Set its flow type to <em>Data destination</em>. Copy the credentials into your environment variables:
+            </p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-left">
+                        <tr>
+                            <th class="px-4 py-2.5 font-medium text-gray-600 w-64">Variable</th>
+                            <th class="px-4 py-2.5 font-medium text-gray-600">Description</th>
+                            <th class="px-4 py-2.5 font-medium text-gray-600 w-56">Example</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% set setup_vars = [
+                            {var: 'AKENEO_BASE_URL', desc: 'Full URL of your PIM instance', ex: 'https://your-pim.cloud.akeneo.com'},
+                            {var: 'AKENEO_CLIENT_ID', desc: 'Client ID from the connection', ex: ''},
+                            {var: 'AKENEO_CLIENT_SECRET', desc: 'Client secret from the connection', ex: ''},
+                            {var: 'AKENEO_USERNAME', desc: 'Username from the connection', ex: ''},
+                            {var: 'AKENEO_PASSWORD', desc: 'Password from the connection', ex: ''},
+                            {var: 'AKENEO_LABEL_ATTRIBUTE', desc: 'Attribute code used as the product display name', ex: 'name'},
+                            {var: 'AKENEO_IMAGE_ATTRIBUTE', desc: 'Comma-separated image attribute codes (order determines display)', ex: 'main_image,packshot'},
+                            {var: 'AKENEO_DESCRIPTION_ATTRIBUTE', desc: 'Attribute code used as the product description', ex: 'description'}
+                        ] %}
+                        {% for row in setup_vars %}
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="px-4 py-2.5 font-mono text-xs text-indigo-700">{{ row.var }}</td>
+                            <td class="px-4 py-2.5 text-gray-600">{{ row.desc }}</td>
+                            <td class="px-4 py-2.5 font-mono text-xs text-gray-400">{{ row.ex }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">2 — Install the Action UI Extension</h3>
+            <p class="text-sm text-gray-500 mb-4">
+                The Action Extension adds an <em>Export to Marketplace</em> button to the product grid.
+                When clicked it sends the selected product UUIDs to this app, signed with an HMAC-SHA512 secret.
+            </p>
+            <ol class="space-y-2 text-sm text-gray-600 mb-4 list-none">
+                {% set action_steps = [
+                    'In the PIM go to <strong class="text-gray-800">Connect › Extensions › Action</strong> and create a new extension.',
+                    'Set the <strong class="text-gray-800">action URL</strong> to <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">https://your-app-url/api/products/sync</code>.',
+                    'Generate a strong random secret and set it as the extension\'s signing secret.',
+                    'Copy that same secret into the <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">AKENEO_SYNC_SECRET</code> environment variable of this app.',
+                    'The extension will send the request with a <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">Signature: sha512=&lt;hmac&gt;</code> header that the app verifies before processing.'
+                ] %}
+                {% for item in action_steps %}
+                <li class="flex gap-3">
+                    <span class="text-gray-300 font-bold shrink-0">›</span>
+                    <span>{{ item | safe }}</span>
+                </li>
+                {% endfor %}
+            </ol>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-left">
+                        <tr>
+                            <th class="px-4 py-2.5 font-medium text-gray-600 w-64">Variable</th>
+                            <th class="px-4 py-2.5 font-medium text-gray-600">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white">
+                            <td class="px-4 py-2.5 font-mono text-xs text-indigo-700">AKENEO_SYNC_SECRET</td>
+                            <td class="px-4 py-2.5 text-gray-600">Shared HMAC-SHA512 secret between the Action Extension and this app. Comma-separate multiple values for zero-downtime rotation.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">3 — Subscribe to product update events</h3>
+            <p class="text-sm text-gray-500 mb-4">
+                Unlike the Action Extension, this is <strong class="text-gray-700">not</strong> configured in the PIM UI — the
+                Event Platform has its own separate API at <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">event.prd.sdk.akeneo.cloud</code>,
+                distinct from your PIM's own REST API. It pushes a webhook whenever a product is updated; the app re-syncs
+                that product if it's already in the catalogue.
+            </p>
+            <ol class="space-y-2 text-sm text-gray-600 mb-4 list-none">
+                {% set webhook_steps = [
+                    'Create a subscriber: <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">POST https://event.prd.sdk.akeneo.cloud/api/v1/subscribers</code>, authenticated with your PIM connection\'s <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">X-PIM-URL</code>, <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">X-PIM-TOKEN</code> and <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">X-PIM-CLIENT-ID</code> headers. Save the returned subscriber <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">id</code>.',
+                    'Create a subscription on that subscriber: <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">POST /api/v1/subscribers/{id}/subscriptions</code> with <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">events: ["com.akeneo.pim.v1.product.updated"]</code>, <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">type: "https"</code>, and <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">config.url</code> set to <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">https://your-app-url/webhook/product-updated</code>.',
+                    'Set <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">config.secret.primary</code> (and optionally <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">secondary</code>) in that same request — these become the signing secrets.',
+                    'Copy the secret(s) into <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">AKENEO_WEBHOOK_SECRET</code>. The app validates against both the primary and secondary signature headers, so you can rotate without downtime.',
+                    'Activation isn\'t instant — Akeneo notes it can take a few minutes after creating or updating a subscription.'
+                ] %}
+                {% for item in webhook_steps %}
+                <li class="flex gap-3">
+                    <span class="text-gray-300 font-bold shrink-0">›</span>
+                    <span>{{ item | safe }}</span>
+                </li>
+                {% endfor %}
+            </ol>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-left">
+                        <tr>
+                            <th class="px-4 py-2.5 font-medium text-gray-600 w-64">Variable</th>
+                            <th class="px-4 py-2.5 font-medium text-gray-600">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white">
+                            <td class="px-4 py-2.5 font-mono text-xs text-indigo-700">AKENEO_WEBHOOK_SECRET</td>
+                            <td class="px-4 py-2.5 text-gray-600">Signing secret(s) set on the Event Platform subscription. Comma-separate two values during key rotation.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="text-lg font-semibold text-gray-800 mb-5">Technology stack</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div class="bg-white border border-green-200 rounded-lg p-4">
+                <div class="text-2xl mb-1.5">🟢</div>
+                <p class="text-sm font-medium text-gray-800">Node.js 22 / Express 4</p>
+                <p class="text-xs text-gray-400 mt-0.5">Application framework</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <div class="text-2xl mb-1.5">🗄️</div>
+                <p class="text-sm font-medium text-gray-800">PostgreSQL 15</p>
+                <p class="text-xs text-gray-400 mt-0.5">Product &amp; category data</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <div class="text-2xl mb-1.5">⚡</div>
+                <p class="text-sm font-medium text-gray-800">Redis 7</p>
+                <p class="text-xs text-gray-400 mt-0.5">Catalogue cache</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <div class="text-2xl mb-1.5">🐰</div>
+                <p class="text-sm font-medium text-gray-800">RabbitMQ 3.12</p>
+                <p class="text-xs text-gray-400 mt-0.5">Async sync queue (AMQP, concurrency 2)</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <div class="text-2xl mb-1.5">🔷</div>
+                <p class="text-sm font-medium text-gray-800">Prisma ORM</p>
+                <p class="text-xs text-gray-400 mt-0.5">Database access &amp; migrations</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <div class="text-2xl mb-1.5">☁️</div>
+                <p class="text-sm font-medium text-gray-800">Upsun</p>
+                <p class="text-xs text-gray-400 mt-0.5">Platform: web app + worker + cron</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}

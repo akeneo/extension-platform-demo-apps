@@ -1,0 +1,644 @@
+===== SAMPLE 1 at 2026-07-28T12:51:27Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:41:30+00:00 to 2026-07-28T12:51:30+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.1% |
+| app--messenger | 0.02 | 4.4% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.1% |
+| queue          | 0.01 | 2.2% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:41:34+00:00 to 2026-07-28T12:51:34+00:00:
++----------------+-----------+-------+
+| app            | 94.9 MiB  | 42.4% |
+| app--messenger | 38.3 MiB  | 17.1% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 141.2 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 2 at 2026-07-28T12:53:39Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:43:40+00:00 to 2026-07-28T12:53:40+00:00:
++----------------+------+------+
+| app            | 0.02 | 4.0% |
+| app--messenger | 0.01 | 1.4% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.2% |
+| queue          | 0.01 | 2.2% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:43:43+00:00 to 2026-07-28T12:53:43+00:00:
++----------------+-----------+-------+
+| app            | 94.8 MiB  | 42.3% |
+| app--messenger | 37.5 MiB  | 16.7% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 139.8 MiB | 9.9%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 3 at 2026-07-28T12:55:47Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:45:48+00:00 to 2026-07-28T12:55:48+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.1% |
+| app--messenger | 0.02 | 4.4% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.1% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:45:49+00:00 to 2026-07-28T12:55:49+00:00:
++----------------+-----------+-------+
+| app            | 95.4 MiB  | 42.6% |
+| app--messenger | 38.2 MiB  | 17.0% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 139.7 MiB | 9.9%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 4 at 2026-07-28T12:57:53Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:47:55+00:00 to 2026-07-28T12:57:55+00:00:
++----------------+------+------+
+| app            | 0    | 0.9% |
+| app--messenger | 0.01 | 1.3% |
+| cache          | 0    | 0.2% |
+| database       | 0.02 | 4.7% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:47:57+00:00 to 2026-07-28T12:57:57+00:00:
++----------------+-----------+-------+
+| app            | 95.3 MiB  | 42.6% |
+| app--messenger | 37.3 MiB  | 16.7% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 138.7 MiB | 9.9%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 5 at 2026-07-28T13:00:00Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:50:02+00:00 to 2026-07-28T13:00:02+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.1% |
+| app--messenger | 0.01 | 1.2% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.1% |
+| queue          | 0.01 | 2.2% |
+| router         | 0    | 0.3% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:50:03+00:00 to 2026-07-28T13:00:03+00:00:
++----------------+-----------+-------+
+| app            | 95.2 MiB  | 42.5% |
+| app--messenger | 37.3 MiB  | 16.6% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 140.0 MiB | 9.9%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 6 at 2026-07-28T13:02:07Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:52:08+00:00 to 2026-07-28T13:02:08+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.7% |
+| app--messenger | 0.01 | 1.3% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.1% |
+| queue          | 0.01 | 2.1% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:52:09+00:00 to 2026-07-28T13:02:09+00:00:
++----------------+-----------+-------+
+| app            | 95.4 MiB  | 42.6% |
+| app--messenger | 36.4 MiB  | 16.3% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 141.4 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 7 at 2026-07-28T13:04:13Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:54:14+00:00 to 2026-07-28T13:04:14+00:00:
++----------------+------+------+
+| app            | 0.02 | 3.3% |
+| app--messenger | 0.01 | 1.2% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.2% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:54:17+00:00 to 2026-07-28T13:04:17+00:00:
++----------------+-----------+-------+
+| app            | 95.6 MiB  | 42.7% |
+| app--messenger | 37.4 MiB  | 16.7% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 141.5 MiB | 10.1% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 8 at 2026-07-28T13:06:20Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:56:21+00:00 to 2026-07-28T13:06:21+00:00:
++----------------+------+------+
+| app            | 0.02 | 3.2% |
+| app--messenger | 0.01 | 1.4% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.2% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:56:22+00:00 to 2026-07-28T13:06:22+00:00:
++----------------+-----------+-------+
+| app            | 95.4 MiB  | 42.6% |
+| app--messenger | 23.8 MiB  | 10.6% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 140.3 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 9 at 2026-07-28T13:08:25Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T12:58:27+00:00 to 2026-07-28T13:08:27+00:00:
++----------------+------+------+
+| app            | 0.02 | 3.0% |
+| app--messenger | 0.01 | 1.3% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.2% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T12:58:28+00:00 to 2026-07-28T13:08:28+00:00:
++----------------+-----------+-------+
+| app            | 95.3 MiB  | 42.5% |
+| app--messenger | 37.4 MiB  | 16.7% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 138.9 MiB | 9.9%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 10 at 2026-07-28T13:10:33Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T13:00:35+00:00 to 2026-07-28T13:10:35+00:00:
++----------------+------+------+
+| app            | 0.02 | 3.0% |
+| app--messenger | 0    | 0.0% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.2% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T13:00:39+00:00 to 2026-07-28T13:10:39+00:00:
++----------------+-----------+-------+
+| app            | 95.1 MiB  | 42.5% |
+| app--messenger | 37.2 MiB  | 16.6% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 138.2 MiB | 9.8%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 11 at 2026-07-28T13:12:43Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249609 ready=249609 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T13:02:46+00:00 to 2026-07-28T13:12:46+00:00:
++----------------+------+------+
+| app            | 0.01 | 2.0% |
+| app--messenger | 0.01 | 1.3% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.5% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.7% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T13:02:47+00:00 to 2026-07-28T13:12:47+00:00:
++----------------+-----------+-------+
+| app            | 104.7 MiB | 46.7% |
+| app--messenger | 37.3 MiB  | 16.7% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 137.2 MiB | 9.7%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4526
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 12 at 2026-07-28T13:14:51Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249611 ready=249611 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T13:04:52+00:00 to 2026-07-28T13:14:52+00:00:
++----------------+------+------+
+| app            | 0.01 | 2.3% |
+| app--messenger | 0.01 | 1.9% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.5% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.7% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T13:04:53+00:00 to 2026-07-28T13:14:53+00:00:
++----------------+-----------+-------+
+| app            | 113.1 MiB | 50.5% |
+| app--messenger | 46.0 MiB  | 20.5% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 99.0 MiB  | 7.0%  |
+| queue          | 140.0 MiB | 9.9%  |
+| router         | 47.6 MiB  | 37.2% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4528
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 13 at 2026-07-28T13:16:57Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249611 ready=249611 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T13:06:58+00:00 to 2026-07-28T13:16:58+00:00:
++----------------+------+------+
+| app            | 0.01 | 2.1% |
+| app--messenger | 0.02 | 4.1% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.6% |
+| queue          | 0.01 | 2.2% |
+| router         | 0    | 0.7% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T13:07:00+00:00 to 2026-07-28T13:17:00+00:00:
++----------------+-----------+-------+
+| app            | 110.1 MiB | 49.1% |
+| app--messenger | 36.8 MiB  | 16.4% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 138.5 MiB | 9.8%  |
+| router         | 47.5 MiB  | 37.1% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4528
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+
+===== SAMPLE 14 at 2026-07-28T13:19:03Z =====
+--- queue depth ---
+messages messages=0 ready=0 unacked=0 consumers=0
+messages_async messages=249611 ready=249611 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T13:09:04+00:00 to 2026-07-28T13:19:04+00:00:
++----------------+------+------+
+| app            | 0.01 | 2.4% |
+| app--messenger | 0.01 | 1.3% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.5% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.7% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T13:09:05+00:00 to 2026-07-28T13:19:05+00:00:
++----------------+-----------+-------+
+| app            | 107.2 MiB | 47.9% |
+| app--messenger | 37.4 MiB  | 16.7% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.3 MiB  | 6.9%  |
+| queue          | 138.5 MiB | 9.8%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     6 |      1
+(1 row)
+
+--- sync_attempt status breakdown (this test only, type='webhook') ---
+  status   | count 
+-----------+-------
+ completed |  4528
+(1 row)
+
+--- 429 signature check ---
+ count 
+-------
+     0
+(1 row)
+
+

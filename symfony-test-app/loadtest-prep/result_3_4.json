@@ -1,0 +1,23 @@
+{
+  "rate": 100,
+  "targetDurationSec": 1800,
+  "elapsedSec": 1808,
+  "sent": 171137,
+  "succeeded": 111563,
+  "failed": 59159,
+  "timedOut": 34459,
+  "successRatePct": 65.19,
+  "statusCounts": {
+    "200": 111563,
+    "error": 24700,
+    "timeout": 34459
+  },
+  "latencyMs": {
+    "p50": 4615,
+    "p95": 6399,
+    "p99": 9186,
+    "max": 12738
+  },
+  "complete": true,
+  "updatedAt": "2026-07-28T07:39:52.886Z"
+}

@@ -1,0 +1,307 @@
+===== SAMPLE 1 at 2026-07-28T08:36:39Z =====
+--- queue depth ---
+messages messages=292 ready=291 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:26:41+00:00 to 2026-07-28T08:36:41+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.1% |
+| app--messenger | 0.03 | 6.5% |
+| cache          | 0    | 0.2% |
+| database       | 0    | 0.3% |
+| queue          | 0.01 | 2.2% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:26:43+00:00 to 2026-07-28T08:36:43+00:00:
++----------------+-----------+-------+
+| app            | 96.4 MiB  | 43.0% |
+| app--messenger | 83.0 MiB  | 37.0% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.5 MiB  | 6.9%  |
+| queue          | 140.5 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+===== SAMPLE 2 at 2026-07-28T08:39:44Z =====
+--- queue depth ---
+messages messages=286 ready=285 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:29:46+00:00 to 2026-07-28T08:39:46+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.0% |
+| app--messenger | 0.03 | 6.3% |
+| cache          | 0    | 0.3% |
+| database       | 0    | 0.2% |
+| queue          | 0.01 | 2.2% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:29:46+00:00 to 2026-07-28T08:39:46+00:00:
++----------------+-----------+-------+
+| app            | 96.7 MiB  | 43.2% |
+| app--messenger | 87.6 MiB  | 39.1% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.5 MiB  | 6.9%  |
+| queue          | 140.5 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+===== SAMPLE 3 at 2026-07-28T08:42:47Z =====
+--- queue depth ---
+messages messages=280 ready=279 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:32:49+00:00 to 2026-07-28T08:42:49+00:00:
++----------------+------+-------+
+| app            | 0.01 | 1.1%  |
+| app--messenger | 0.06 | 11.1% |
+| cache          | 0    | 0.3%  |
+| database       | 0    | 0.3%  |
+| queue          | 0.01 | 2.2%  |
+| router         | 0    | 0.0%  |
++----------------+------+-------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:32:50+00:00 to 2026-07-28T08:42:50+00:00:
++----------------+-----------+-------+
+| app            | 96.6 MiB  | 43.1% |
+| app--messenger | 81.5 MiB  | 36.4% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.5 MiB  | 6.9%  |
+| queue          | 140.3 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+===== SAMPLE 4 at 2026-07-28T08:45:52Z =====
+--- queue depth ---
+messages messages=273 ready=272 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:35:53+00:00 to 2026-07-28T08:45:53+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.0% |
+| app--messenger | 0.03 | 6.4% |
+| cache          | 0    | 0.0% |
+| database       | 0    | 0.3% |
+| queue          | 0.01 | 2.2% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:35:54+00:00 to 2026-07-28T08:45:54+00:00:
++----------------+-----------+-------+
+| app            | 96.7 MiB  | 43.2% |
+| app--messenger | 81.5 MiB  | 36.4% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.5 MiB  | 6.9%  |
+| queue          | 140.4 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+===== SAMPLE 5 at 2026-07-28T08:48:56Z =====
+--- queue depth ---
+messages messages=267 ready=266 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:38:57+00:00 to 2026-07-28T08:48:57+00:00:
++----------------+------+-------+
+| app            | 0.01 | 1.2%  |
+| app--messenger | 0.06 | 11.1% |
+| cache          | 0    | 0.3%  |
+| database       | 0    | 0.3%  |
+| queue          | 0.01 | 2.2%  |
+| router         | 0    | 0.0%  |
++----------------+------+-------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:38:58+00:00 to 2026-07-28T08:48:58+00:00:
++----------------+-----------+-------+
+| app            | 96.6 MiB  | 43.1% |
+| app--messenger | 80.8 MiB  | 36.1% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.5 MiB  | 6.9%  |
+| queue          | 140.4 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+===== SAMPLE 6 at 2026-07-28T08:52:00Z =====
+--- queue depth ---
+messages messages=261 ready=260 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:42:01+00:00 to 2026-07-28T08:52:01+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.1% |
+| app--messenger | 0.03 | 6.7% |
+| cache          | 0.03 | 5.9% |
+| database       | 0    | 0.3% |
+| queue          | 0.01 | 2.1% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:42:02+00:00 to 2026-07-28T08:52:02+00:00:
++----------------+-----------+-------+
+| app            | 97.0 MiB  | 43.3% |
+| app--messenger | 84.2 MiB  | 37.6% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.5 MiB  | 6.9%  |
+| queue          | 140.4 MiB | 10.0% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+===== SAMPLE 7 at 2026-07-28T08:55:04Z =====
+--- queue depth ---
+messages messages=255 ready=254 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:45:06+00:00 to 2026-07-28T08:55:06+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.2% |
+| app--messenger | 0.03 | 6.8% |
+| cache          | 0    | 0.3% |
+| database       | 0    | 0.3% |
+| queue          | 0.01 | 2.3% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:45:08+00:00 to 2026-07-28T08:55:08+00:00:
++----------------+-----------+-------+
+| app            | 96.9 MiB  | 43.3% |
+| app--messenger | 82.0 MiB  | 36.6% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.5 MiB  | 6.9%  |
+| queue          | 139.3 MiB | 9.9%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+===== SAMPLE 8 at 2026-07-28T08:58:11Z =====
+--- queue depth ---
+messages messages=249 ready=248 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:48:12+00:00 to 2026-07-28T08:58:12+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.1% |
+| app--messenger | 0.03 | 6.6% |
+| cache          | 0    | 0.3% |
+| database       | 0.03 | 5.4% |
+| queue          | 0.01 | 1.9% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:48:13+00:00 to 2026-07-28T08:58:13+00:00:
++----------------+-----------+-------+
+| app            | 96.4 MiB  | 43.0% |
+| app--messenger | 84.5 MiB  | 37.7% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.6 MiB  | 6.9%  |
+| queue          | 142.7 MiB | 10.1% |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+===== SAMPLE 9 at 2026-07-28T09:01:15Z =====
+--- queue depth ---
+messages messages=243 ready=242 unacked=1 consumers=0
+messages_async messages=245083 ready=245083 unacked=0 consumers=0
+--- cpu/memory ---
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average CPU usage at 1m intervals from 2026-07-28T08:51:16+00:00 to 2026-07-28T09:01:16+00:00:
++----------------+------+------+
+| app            | 0.01 | 1.2% |
+| app--messenger | 0.03 | 6.8% |
+| cache          | 0    | 0.3% |
+| database       | 0    | 0.3% |
+| queue          | 0.01 | 2.2% |
+| router         | 0    | 0.0% |
++----------------+------+------+
+Selected project: Symfony test app (gtipgifdob6ek)
+Selected environment: main (type: production)
+Average memory usage at 1m intervals from 2026-07-28T08:51:19+00:00 to 2026-07-28T09:01:19+00:00:
++----------------+-----------+-------+
+| app            | 96.7 MiB  | 43.2% |
+| app--messenger | 83.6 MiB  | 37.3% |
+| cache          | 9.9 MiB   | 0.9%  |
+| database       | 97.6 MiB  | 6.9%  |
+| queue          | 139.3 MiB | 9.9%  |
+| router         | 46.8 MiB  | 36.5% |
++----------------+-----------+-------+
+--- postgres connections ---
+ total | active 
+-------+--------
+     7 |      1
+(1 row)
+
+
+MONITORING DONE

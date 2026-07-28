@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  identifier     String    @id
+  label          Json?
+  imageFilenames Json?     @map("image_filenames")
+  categories     Json?
+  enabled        Boolean   @default(false)
+  parent         String?
+  parentLabel    String?   @map("parent_label")
+  variationLabel String?   @map("variation_label")
+  description    String?
+  completeness   Float?
+  price          Float?
+  stock          Int?
+  syncedAt       DateTime? @map("synced_at")
+
+  @@map("product")
+}
+
+model Category {
+  code  String  @id
+  label String?
+
+  @@map("category")
+}
+
+model SyncLog {
+  id       Int      @id @default(autoincrement())
+  syncedAt DateTime @default(now()) @map("synced_at")
+  count    Int
+  trigger  String
+
+  @@map("sync_log")
+}
+
+model SyncAttempt {
+  id         Int       @id @default(autoincrement())
+  type       String
+  status     String    @default("queued")
+  input      String?
+  count      Int?
+  apiCalls   Int?      @map("api_calls")
+  error      String?
+  queuedAt   DateTime  @default(now()) @map("queued_at")
+  startedAt  DateTime? @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  attempts   Int       @default(0)
+
+  @@index([queuedAt])
+  @@index([type])
+  @@map("sync_attempt")
+}

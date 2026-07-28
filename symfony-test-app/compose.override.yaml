@@ -1,0 +1,38 @@
+
+services:
+###> blackfireio/blackfire-symfony-meta ###
+  blackfire:
+    image: blackfire/blackfire:2
+    #env_file: .env.local
+    environment:
+      BLACKFIRE_LOG_LEVEL: 4
+    ports: ["8307"]
+###< blackfireio/blackfire-symfony-meta ###
+
+###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: "!ChangeMe!"
+    ports: ["5432:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+###< doctrine/doctrine-bundle ###
+
+  cache:
+    image: redis:7.2-alpine
+    ports: ["6379:6379"]
+
+  queue:
+    image: rabbitmq:3.12-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  postgres_data:
