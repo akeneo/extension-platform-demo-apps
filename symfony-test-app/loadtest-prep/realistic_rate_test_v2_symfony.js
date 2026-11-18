@@ -20,7 +20,8 @@ const OUTPUT_PATH = process.argv[4] || './result.json';
 
 const HOST = 'main-bvxea6i-gtipgifdob6ek.eu-5.platformsh.site';
 const REQ_PATH = '/webhook/product-updated';
-const SECRET = process.env.AKENEO_WEBHOOK_SECRET || 'my-super-secret-primary-key-123456';
+const SECRET = process.env.AKENEO_WEBHOOK_SECRET;
+if (!SECRET) throw new Error('Set AKENEO_WEBHOOK_SECRET to the app webhook secret (read it from the app environment variables)');
 const TIMEOUT_MS = 5000; // Akeneo counts a 5s response timeout as a failure
 
 const agent = new https.Agent({ keepAlive: true, maxFreeSockets: 2 });

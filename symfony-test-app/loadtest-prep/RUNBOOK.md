@@ -48,8 +48,8 @@ this — not decided as part of this prep.
 
 - Project ID: `gtipgifdob6ek`, environment `main`
 - Live URL: `https://main-bvxea6i-gtipgifdob6ek.eu-5.platformsh.site/`
-- `AKENEO_WEBHOOK_SECRET`: `my-super-secret-primary-key-123456` (reconfirmed
-  live via SSH today — same value as the Node app, unrotated)
+- `AKENEO_WEBHOOK_SECRET`: read it from the app's environment variables (same
+  value as the Node app) and export it before running the load-test scripts.
 - Webhook route: `POST /webhook/product-updated`, payload shape
   `{"data": {"product": {"uuid": "..."}}}`, signature header
   `x-akeneo-signature-primary` (HMAC-SHA256)

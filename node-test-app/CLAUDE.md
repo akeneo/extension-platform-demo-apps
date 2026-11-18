@@ -59,8 +59,8 @@ other**:
 - Push to Node directly by full refspec, no named remote needed:
   `git push 5l73tu5p63wae@git.eu-5.platform.sh:5l73tu5p63wae.git <local-branch>:main`
 - Live URL: `https://main-bvxea6i-5l73tu5p63wae.eu-5.platformsh.site/`
-- `AKENEO_WEBHOOK_SECRET`: `my-super-secret-primary-key-123456` — reconfirmed
-  live via SSH mid-investigation (34 chars, unrotated since first noted).
+- `AKENEO_WEBHOOK_SECRET`: read it from the app's environment variables (same
+  value as the Symfony app). Never write its value in this repo.
 - Real connected-PIM product count: **544** (Symfony's sandbox has 571 —
   different sandboxes, don't assume parity).
 
