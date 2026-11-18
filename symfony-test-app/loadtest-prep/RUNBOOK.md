@@ -91,7 +91,7 @@ minutes, placeholder (non-existent) UUIDs — zero real PIM API cost, isolates
 ingress only.
 
 ```bash
-cd ~/Projects/extension-platform-symfony-test-app/loadtest-prep
+cd ~/Projects/extension-platform-apps/extension-platform-symfony-test-app/loadtest-prep
 node realistic_rate_test_v2_symfony.js 100 1800 result_3_4.json > run_3_4.log 2>&1 &
 ```
 
@@ -137,7 +137,7 @@ the current UTC timestamp (`date -u +%Y-%m-%dT%H:%M:%SZ`) — this filters the
 ~108,247 completed `'webhook'`-type rows in the table from prior sessions.
 
 ```bash
-cd ~/Projects/extension-platform-symfony-test-app/loadtest-prep
+cd ~/Projects/extension-platform-apps/extension-platform-symfony-test-app/loadtest-prep
 # capture $(date -u +%Y-%m-%dT%H:%M:%SZ) and paste it into monitor_pressure_symfony.sh's CUTOFF line first
 
 node webhook_pressure_test_symfony.js 5 900 real_uuids.txt pressure_result.json > pressure_run.log 2>&1 &

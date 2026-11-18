@@ -1,3 +1,17 @@
+# Keep this app in sync with extension-platform-demo-apps
+
+This app exists in two copies, and every change must land in both:
+
+- this standalone repo (`~/Projects/extension-platform-apps/extension-platform-node-test-app`), which is pushed to Upsun to deploy the app;
+- the `node-test-app/` folder of the GitHub repo akeneo/extension-platform-demo-apps (local clone: `~/Projects/extension-platform-apps/extension-platform-demo-apps`), which is the reference copy.
+
+So after each commit here, replay it in the demo-apps repo and push that repo to GitHub:
+
+    git format-patch -1 HEAD -o /tmp/sync                           # here
+    git am --directory=node-test-app /tmp/sync/*.patch              # in extension-platform-demo-apps
+
+Keep this section if you delete the load-test handoff below.
+
 # Load-test investigation handoff (Node app)
 
 This file exists so a fresh Claude Code session opened in this folder picks up
@@ -8,7 +22,7 @@ folded into permanent documentation.
 ## What this is
 
 Mirroring a load-test/capacity investigation already completed on the Symfony
-sibling app (`~/Projects/extension-platform-symfony-test-app`), now being
+sibling app (`~/Projects/extension-platform-apps/extension-platform-symfony-test-app`), now being
 repeated on this Node.js app. Same integration pattern: Akeneo PIM <-> a
 marketplace storefront, three sync triggers (Action UI Extension POST,
 Event Platform webhook, nightly cron).
@@ -22,17 +36,16 @@ other**:
 
 ## Branch/worktree situation — read before touching anything
 
-- This repo (`~/Projects/extension-platform-node-test-app`) was on
+- This repo (`~/Projects/extension-platform-apps/extension-platform-node-test-app`) was on
   `add_stock_feature` (a demo-prep branch) at the start of the investigation,
   but **the user explicitly asked to check out `main` here** partway through
   — it's on `main` now. `add_stock_feature` still exists as a branch
   (local + `upsun` remote), just not checked out; nothing on it was touched
   or discarded.
-- Real code changes for this investigation are made in a **separate git
-  worktree** checked out to `main` at
-  `/home/julien-verbrugge/Projects/extension-platform-node-test-app-worktree`
-  (branch `worktree/node-load-test`). Confirmed still present and in use.
-  If it's ever gone, recreate with `git worktree add <path> -b <branch> main`.
+- Code changes for this investigation were made in a separate git worktree
+  on branch `worktree/node-load-test`. On 2026-11-18 its two commits were
+  fast-forwarded into `main` and copied to extension-platform-demo-apps, then
+  the worktree and the branch were removed. Work on `main` directly.
 
 ## Deployment target
 
