@@ -6,13 +6,13 @@
 # IMPORTANT: the "async" queue is named "messages_async" on Symfony (confirmed live),
 # NOT "product-sync" like Node. Baseline queue depth is NOT zero on this app --
 # there was a pre-existing, un-drained backlog of ~109,971 messages found idle since
-# 2026-07-27T02:19:55Z (see RUNBOOK.md). Investigate/resolve that BEFORE running this,
+# 2026-07-27T02:19:55Z (see symfony-load-test-runbook.md). Investigate/resolve that BEFORE running this,
 # or numbers will conflate the old backlog with the new test's dispatch.
 #
-# Usage: bash monitor_backlog_symfony.sh [output_log_path]
+# Usage: PROJ=<project id> bash monitor_backlog.sh [output_log_path]
 
 CLI=akeneo-extension-platform
-PROJ=gtipgifdob6ek
+PROJ="${PROJ:?Set PROJ to the app project ID, see README.md}"
 ENV=main
 OUT="${1:-./samples_backlog.log}"
 

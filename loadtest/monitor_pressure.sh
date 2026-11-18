@@ -8,17 +8,19 @@
 #   - queue name is "messages_async", not "product-sync"
 #   - sync_attempt.type for webhook-driven syncs is 'webhook', not 'productUpdated'
 #     (confirmed live: existing rows show type IN ('daily-sync','daily-sync-simulate','sync','webhook'))
-#   - Set CUTOFF below to the actual UTC timestamp just before you launch
-#     webhook_pressure_test_symfony.js, so the sync_attempt query only counts
+#   - Set CUTOFF to the actual UTC timestamp just before you launch
+#     webhook_pressure_test.js, so the sync_attempt query only counts
 #     this test's rows, not the pre-existing ~108,247 completed 'webhook' rows
 #     already in the table from prior sessions.
 #
-# Usage: bash monitor_pressure_symfony.sh [output_log_path]
+# Usage: PROJ=<project id> CUTOFF=<UTC start time> bash monitor_pressure.sh [output_log_path]
 
 CLI=akeneo-extension-platform
-PROJ=gtipgifdob6ek
+PROJ="${PROJ:?Set PROJ to the app project ID, see README.md}"
 ENV=main
-CUTOFF="2026-07-28T09:54:06Z"
+CUTOFF="${CUTOFF:?Set CUTOFF to the UTC time the test starts}"
+# The Node app records webhook syncs as productUpdated, the Symfony app as webhook.
+WEBHOOK_TYPE="${WEBHOOK_TYPE:-webhook}"
 OUT="${1:-./samples_pressure.log}"
 
 for i in $(seq 1 15); do
@@ -36,10 +38,10 @@ for i in $(seq 1 15); do
   $CLI db:sql -p $PROJ -e $ENV "SELECT count(*) AS total, count(*) FILTER (WHERE state='active') AS active FROM pg_stat_activity;" >> "$OUT" 2>&1
 
   echo "--- sync_attempt status breakdown (this test only, type='webhook') ---" >> "$OUT"
-  $CLI db:sql -p $PROJ -e $ENV "SELECT status, count(*) FROM sync_attempt WHERE type='webhook' AND queued_at > '$CUTOFF' GROUP BY status;" >> "$OUT" 2>&1
+  $CLI db:sql -p $PROJ -e $ENV "SELECT status, count(*) FROM sync_attempt WHERE type='$WEBHOOK_TYPE' AND queued_at > '$CUTOFF' GROUP BY status;" >> "$OUT" 2>&1
 
   echo "--- 429 signature check ---" >> "$OUT"
-  $CLI db:sql -p $PROJ -e $ENV "SELECT count(*) FROM sync_attempt WHERE type='webhook' AND queued_at > '$CUTOFF' AND error ILIKE '%429%';" >> "$OUT" 2>&1
+  $CLI db:sql -p $PROJ -e $ENV "SELECT count(*) FROM sync_attempt WHERE type='$WEBHOOK_TYPE' AND queued_at > '$CUTOFF' AND error ILIKE '%429%';" >> "$OUT" 2>&1
 
   echo "" >> "$OUT"
   if [ $i -lt 15 ]; then sleep 120; fi

@@ -9,3 +9,6 @@ So after each commit here, replay it in the demo-apps repo and push that repo to
 
     git format-patch -1 HEAD -o /tmp/sync                           # here
     git am --directory=symfony-test-app /tmp/sync/*.patch           # in extension-platform-demo-apps
+
+Load-test scripts and notes shared by both apps live in `loadtest/` at the root of
+extension-platform-demo-apps, outside both app folders.

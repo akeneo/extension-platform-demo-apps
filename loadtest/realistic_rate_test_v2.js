@@ -6,9 +6,9 @@
 // zero real PIM API cost). Rate defaults to 100/sec to match Akeneo's actual max
 // send rate and be directly comparable to the Node result.
 //
-// Usage: node realistic_rate_test_v2_symfony.js <rate> <durationSec> <outputPath>
+// Usage: APP_HOST=<host> AKENEO_WEBHOOK_SECRET=<secret> node realistic_rate_test_v2.js <rate> <durationSec> <outputPath>
 // Example (30 min @ 100/sec, matching Node's 3.4):
-//   node realistic_rate_test_v2_symfony.js 100 1800 result.json
+//   node realistic_rate_test_v2.js 100 1800 result.json
 
 const https = require('https');
 const crypto = require('crypto');
@@ -18,7 +18,8 @@ const RATE = parseFloat(process.argv[2] || '100');
 const DURATION_SEC = parseFloat(process.argv[3] || '1800');
 const OUTPUT_PATH = process.argv[4] || './result.json';
 
-const HOST = 'main-bvxea6i-gtipgifdob6ek.eu-5.platformsh.site';
+const HOST = process.env.APP_HOST;
+if (!HOST) throw new Error('Set APP_HOST to the app host name, see README.md');
 const REQ_PATH = '/webhook/product-updated';
 const SECRET = process.env.AKENEO_WEBHOOK_SECRET;
 if (!SECRET) throw new Error('Set AKENEO_WEBHOOK_SECRET to the app webhook secret (read it from the app environment variables)');

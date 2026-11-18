@@ -1,5 +1,77 @@
 # Symfony load-test parity prep — run tomorrow morning
 
+> Moved here from the Symfony app on 2026-11-18. The scripts now read their target
+> from environment variables (see README.md). For this app: `export
+> APP_HOST=main-bvxea6i-gtipgifdob6ek.eu-5.platformsh.site PROJ=gtipgifdob6ek` and
+> `AKENEO_WEBHOOK_SECRET` from the app's environment variables.
+
+## STATUS (2026-07-28): all three tests done, Notion updated, one rerun pending
+
+All three tests below were run on 2026-07-28. Results are already written into
+https://app.notion.com/p/39e12ed8c590813aacbee4acbf2a006a (sections 3.4-3.6,
+4.4-4.6, and the Appendix). Headline findings:
+
+- **Test 1 (3.4, sustained rate trial)**: severe collapse. 65.19% raw success
+  rate at 100 events/sec (vs. Node's 100%), true effective rate estimated
+  33-62% after correcting for the 5s-timeout caveat. Confirms `pm.max_children=5`
+  is a hard ceiling independent of connection pattern — Akeneo's real,
+  favorable traffic doesn't rescue this.
+- **Test 2 (3.5, one-time 20k backlog)**: clean. ~1.66 products/sec drain,
+  zero failures, no resource strain. Fully drained by ~11:00 (~3.3h after
+  the 07:41 dispatch).
+- **Test 3 (3.6, webhook pressure, 5/sec, real UUIDs)**: DONE, rerun completed
+  2026-07-29 with verified tight timing (monitor's first sample landed 26s
+  after launch, not hours later). Peak backlog 3,774 messages, webhook
+  latency stayed flat (p50=46ms, p95=55ms) throughout — backpressure
+  hypothesis refuted, matching Node. One bounded, non-leaking `app` RAM rise
+  during injection (94.5→126.7 MiB, recovered after). All in Notion now —
+  no further action needed on Test 3.
+
+**Also found (unrelated, informational, now documented in Notion's Appendix)**:
+`gtipgifdob6ek`'s RabbitMQ has an orphaned duplicate queue, `messages_async`
+(vs. the real, actively-consumed `messages` queue) — harmless to real
+processing, just wasted RAM on the `queue` service, growing with every
+publish. Not urgent, noted for whoever wants to clean it up eventually.
+
+## Side topic, noted for later — not investigated further (2026-07-29)
+
+While checking on the natural post-test drain, found 3 `sync_attempt` rows
+(type='webhook') that failed with `HTTP 503: no healthy upstream` from
+Akeneo's own API — a genuine transient third-party outage, unrelated to our
+test load (happened ~37 min after injection had already stopped). Not a
+concern for this investigation's conclusions.
+
+What's worth a closer look eventually: these 3 UUIDs are "sentinel" products
+that get touched on a recurring ~11-minute cadence going back to July 15th —
+some mechanism unrelated to our own testing (unidentified — not our
+injection scripts, which cycle through all 571 products every ~2 minutes,
+not just these 3). The failed attempts recovered only on that mechanism's
+*next natural cycle* ~12.5 minutes later, not within the ~7 seconds
+Messenger's configured retry_strategy (1s/2s/4s, max_retries=3) should have
+taken if it fired. Code review confirmed the retry config is correctly wired
+(handler rethrows, no exception-type exclusions) — so in principle retries
+should happen — but there's no DB evidence of the fast retries actually
+occurring. Open question: does Messenger's retry_strategy actually work for
+this handler, or would a genuine one-off webhook event (no natural
+recurrence to fall back on) have silently failed permanently under the same
+transient 503? Not investigated further per the user's call — this is a
+side topic, unrelated to the main PHP-FPM/backlog findings.
+
+**Critical difference from last time**: immediately after launching both,
+check `samples_pressure_2.log` within 1-2 minutes to confirm Sample 1's
+timestamp is close to `$CUTOFF`, not hours later. If it's delayed again,
+something structural is going on with how this environment schedules a
+second concurrent background process — investigate before trusting the
+data, don't just let it run and assume it's fine.
+
+Once confirmed, update Notion's 4.6 section and the 3.6 Appendix note with
+the real queue-depth-over-time curve and CPU/RAM-during-peak-backlog figures,
+replacing the "rerun planned" callout with the actual data.
+
+---
+
+
+
 Prepared 2026-07-27 in a same-day session with no memory of prior context beyond
 this file. Goal: bring the Symfony Notion doc up to parity with the Node one,
 which now has three tests Symfony's doc doesn't: an Event-Platform-pattern
@@ -91,8 +163,8 @@ minutes, placeholder (non-existent) UUIDs — zero real PIM API cost, isolates
 ingress only.
 
 ```bash
-cd ~/Projects/extension-platform-apps/extension-platform-symfony-test-app/loadtest-prep
-node realistic_rate_test_v2_symfony.js 100 1800 result_3_4.json > run_3_4.log 2>&1 &
+cd ~/Projects/extension-platform-apps/extension-platform-demo-apps/loadtest
+node realistic_rate_test_v2.js 100 1800 result_3_4.json > run_3_4.log 2>&1 &
 ```
 
 Run in background, check `run_3_4.log` every few minutes. Expect this to
@@ -122,7 +194,7 @@ Then dispatch and monitor:
 akeneo-extension-platform ssh -p gtipgifdob6ek -e main --app app -- \
   'php bin/console app:daily-sync-simulate --count=20000'
 
-bash monitor_backlog_symfony.sh samples_backlog.log &
+bash monitor_backlog.sh samples_backlog.log &
 ```
 
 ## Test 3 — 3.6 equivalent: worker backlog drain via webhook (real UUIDs)
@@ -131,17 +203,17 @@ Rate defaults to 5/sec in the script (~6x the ~0.8/sec webhook drain rate,
 same ratio as Node's 10/sec vs ~1.56/sec). 15 min injection + 15 min
 recovery-watch, same structure as Node's 3.6.
 
-**Before launching**, edit `monitor_pressure_symfony.sh` and set `CUTOFF` to
+**Before launching**, export `CUTOFF` set to
 the current UTC timestamp (`date -u +%Y-%m-%dT%H:%M:%SZ`) — this filters the
 `sync_attempt` queries to just this test's rows, since there are already
 ~108,247 completed `'webhook'`-type rows in the table from prior sessions.
 
 ```bash
-cd ~/Projects/extension-platform-apps/extension-platform-symfony-test-app/loadtest-prep
-# capture $(date -u +%Y-%m-%dT%H:%M:%SZ) and paste it into monitor_pressure_symfony.sh's CUTOFF line first
+cd ~/Projects/extension-platform-apps/extension-platform-demo-apps/loadtest
+export CUTOFF=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-node webhook_pressure_test_symfony.js 5 900 real_uuids.txt pressure_result.json > pressure_run.log 2>&1 &
-bash monitor_pressure_symfony.sh samples_pressure.log &
+node webhook_pressure_test.js 5 900 real_uuids.txt pressure_result.json > pressure_run.log 2>&1 &
+bash monitor_pressure.sh samples_pressure.log &
 ```
 
 Watch for the same two things Node's 3.6 checked: does webhook p95 latency

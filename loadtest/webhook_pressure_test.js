@@ -11,9 +11,9 @@
 // in the Node 3.6 test (10/sec vs ~1.56/sec). Adjust if the baseline drain
 // rate is confirmed different at run time.
 //
-// Usage: node webhook_pressure_test_symfony.js <rate> <durationSec> <uuidFile> <outputPath>
+// Usage: APP_HOST=<host> AKENEO_WEBHOOK_SECRET=<secret> node webhook_pressure_test.js <rate> <durationSec> <uuidFile> <outputPath>
 // Example (15 min @ 5/sec, matching Node's 3.6 ratio):
-//   node webhook_pressure_test_symfony.js 5 900 real_uuids.txt pressure_result.json
+//   node webhook_pressure_test.js 5 900 real_uuids.txt pressure_result.json
 
 const https = require('https');
 const crypto = require('crypto');
@@ -24,7 +24,8 @@ const DURATION_SEC = parseFloat(process.argv[3] || '900');
 const UUID_FILE = process.argv[4] || './real_uuids.txt';
 const OUTPUT_PATH = process.argv[5] || './pressure_result.json';
 
-const HOST = 'main-bvxea6i-gtipgifdob6ek.eu-5.platformsh.site';
+const HOST = process.env.APP_HOST;
+if (!HOST) throw new Error('Set APP_HOST to the app host name, see README.md');
 const REQ_PATH = '/webhook/product-updated';
 const SECRET = process.env.AKENEO_WEBHOOK_SECRET;
 if (!SECRET) throw new Error('Set AKENEO_WEBHOOK_SECRET to the app webhook secret (read it from the app environment variables)');
