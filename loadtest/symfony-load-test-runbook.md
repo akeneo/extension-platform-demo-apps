@@ -88,6 +88,12 @@ https://app.notion.com/p/39e12ed8c590813aacbee4acbf2a006a
 
 ## STOP — read this first: the worker looks stalled
 
+> **Resolved:** the worker was not stalled. The exchange `messages` copies every
+> message into two queues: `messages`, which the worker reads, and `messages_async`,
+> which nothing reads. Symfony's worker polls instead of subscribing, so RabbitMQ shows
+> 0 consumers on both. The backlog below was in `messages_async`. Confirmed again on
+> 2026-11-18 with `messenger:stats`.
+
 Found live on 2026-07-27 (~16:00 UTC), NOT yet investigated further per the
 user's own choice at prep time (deliberately deferred to be handled first
 thing tomorrow, not overnight):
@@ -133,8 +139,8 @@ this — not decided as part of this prep.
   `status`, `input`, `error`) — but **`type` for webhook-driven syncs is
   `'webhook'`, not `'productUpdated'`** like Node. The monitoring scripts
   already account for this.
-- RabbitMQ queue name is `messages_async` (single shared queue for webhook +
-  daily-sync + Action Extension messages), not `product-sync` like Node.
+- RabbitMQ queue name is `messages` (single shared queue for webhook +
+  daily-sync + Action Extension messages). `messages_async` is an unread copy of it.
 - `app:daily-sync-simulate --count=N` exists and works exactly like Node's
   version: dispatches batches of 50 and returns immediately, doesn't block
   for processing. No manual env-var export needed to invoke it — `DATABASE_URL`

@@ -4,7 +4,7 @@
 # sync_attempt status/429-signature breakdown every 2 minutes for 30 minutes
 # (15 samples) -- same cadence as the Node investigation's 3.6 test.
 #
-# Both apps use the queue "messages_async" and record webhook syncs as 'webhook'.
+# Both apps' workers read the queue "messages" and record webhook syncs as 'webhook'.
 # Set CUTOFF to the actual UTC timestamp just before you launch
 #     webhook_pressure_test.js, so the sync_attempt query only counts
 #     this test's rows, not the pre-existing ~108,247 completed 'webhook' rows
