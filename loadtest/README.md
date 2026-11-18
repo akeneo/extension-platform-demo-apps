@@ -12,7 +12,6 @@ Each script reads its target from environment variables, so the same script work
 | `PROJ` | `gtipgifdob6ek` | `5l73tu5p63wae` |
 | `AKENEO_WEBHOOK_SECRET` | Read it from the app's environment variables | Same |
 | `CUTOFF` (`monitor_pressure.sh` only) | UTC time the test starts | Same |
-| `WEBHOOK_TYPE` (`monitor_pressure.sh` only) | `webhook` (the default) | `productUpdated` |
 
 ## Files
 

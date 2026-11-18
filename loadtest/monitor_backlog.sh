@@ -3,8 +3,7 @@
 # Samples queue depth, CPU/memory, and Postgres connections every 3 minutes for 24 minutes
 # (9 samples) -- same cadence as the Node investigation's 3.5 test.
 #
-# IMPORTANT: the "async" queue is named "messages_async" on Symfony (confirmed live),
-# NOT "product-sync" like Node. Baseline queue depth is NOT zero on this app --
+# Both apps name their queue "messages_async". Baseline queue depth is NOT zero on this app --
 # there was a pre-existing, un-drained backlog of ~109,971 messages found idle since
 # 2026-07-27T02:19:55Z (see symfony-load-test-runbook.md). Investigate/resolve that BEFORE running this,
 # or numbers will conflate the old backlog with the new test's dispatch.
