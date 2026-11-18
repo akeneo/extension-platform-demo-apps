@@ -80,15 +80,15 @@ router.post('/api/products/sync', async (req: Request, res: Response) => {
   }
 
   if (uuids.length) {
-    const attempt = await db.syncAttempt.create({ data: { type: 'syncByUuid', input: describeCount(uuids, 'UUID') } });
+    const attempt = await db.syncAttempt.create({ data: { type: 'sync', input: describeCount(uuids, 'UUID') } });
     await publish(attempt.id, { type: 'syncByUuid', uuids });
   }
   if (identifiers.length) {
-    const attempt = await db.syncAttempt.create({ data: { type: 'syncByIdentifier', input: describeCount(identifiers, 'identifier') } });
+    const attempt = await db.syncAttempt.create({ data: { type: 'sync', input: describeCount(identifiers, 'identifier') } });
     await publish(attempt.id, { type: 'syncByIdentifier', identifiers });
   }
   if (modelCodes.length) {
-    const attempt = await db.syncAttempt.create({ data: { type: 'syncByModelCode', input: describeCount(modelCodes, 'model code') } });
+    const attempt = await db.syncAttempt.create({ data: { type: 'sync', input: describeCount(modelCodes, 'model code') } });
     await publish(attempt.id, { type: 'syncByModelCode', modelCodes });
   }
 

@@ -13,10 +13,8 @@
         <div class="flex items-center gap-2">
             <select id="type-filter" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-400">
                 <option value="">All types</option>
-                <option value="syncByUuid">By UUID</option>
-                <option value="syncByIdentifier">By Identifier</option>
-                <option value="syncByModelCode">By Model</option>
-                <option value="productUpdated">Webhook</option>
+                <option value="sync">Action Extension</option>
+                <option value="webhook">Webhook</option>
                 <option value="daily-sync">Daily Cron</option>
                 <option value="rejected">Rejected</option>
             </select>
@@ -98,12 +96,10 @@
     const pgNext  = document.getElementById('pg-next');
 
     const TYPE_LABELS = {
-        syncByUuid:       'By UUID',
-        syncByIdentifier: 'By Identifier',
-        syncByModelCode:  'By Model',
-        productUpdated:   'Webhook',
-        'daily-sync':     'Daily Cron',
-        rejected:         'Rejected',
+        'sync':       'Action Extension',
+        'daily-sync': 'Daily Cron',
+        'webhook':    'Webhook',
+        'rejected':   'Rejected',
     };
 
     const STATUS = {

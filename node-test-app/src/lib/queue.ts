@@ -1,6 +1,6 @@
 import * as amqp from 'amqplib';
 
-export const QUEUE_NAME = 'product-sync';
+export const QUEUE_NAME = 'messages_async';
 
 const rabbitmqUrl = process.env.RABBITMQ_URL ?? 'amqp://guest:guest@localhost:5672/';
 

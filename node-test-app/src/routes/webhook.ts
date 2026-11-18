@@ -45,7 +45,7 @@ router.post('/webhook/product-updated', async (req: Request, res) => {
   for (const event of events) {
     const uuid: string | null = event?.data?.product?.uuid ?? null;
     if (!uuid) continue;
-    const attempt = await db.syncAttempt.create({ data: { type: 'productUpdated', input: uuid } });
+    const attempt = await db.syncAttempt.create({ data: { type: 'webhook', input: uuid } });
     await publish(attempt.id, { type: 'productUpdated', identifier: uuid, isUuid: true });
     queued++;
   }
